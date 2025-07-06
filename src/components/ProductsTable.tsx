@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Plus, Package, Star, Calendar, Trash2, Edit, Eye } from 'lucide-react'
 import { supabase, Product } from '@/lib/supabase'
 import CreateProductModal from './CreateProductModal'
 import EditProductModal from './EditProductModal'
@@ -23,13 +25,12 @@ export default function ProductsTable() {
   })
   const [imageModal, setImageModal] = useState<{
     isOpen: boolean
-    imageUrl: string
-    productName: string
+    product: Product | null
   }>({
     isOpen: false,
-    imageUrl: '',
-    productName: ''
+    product: null
   })
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   useEffect(() => {
     fetchProducts()
@@ -102,25 +103,41 @@ export default function ProductsTable() {
     }
   }
 
-  const handleImageClick = (imageUrl: string, productName: string) => {
+  const handleImageClick = (product: Product) => {
     setImageModal({
       isOpen: true,
-      imageUrl,
-      productName
+      product
     })
   }
+
+  // Extrair categorias únicas dos produtos
+  const categories = ['all', ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))]
+
+  // Filtrar produtos por categoria
+  const filteredProducts = selectedCategory === 'all' 
+    ? products 
+    : products.filter(p => p.category === selectedCategory)
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <motion.div 
+          className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8b4513]"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+      <motion.div 
+        className="bg-red-50 border border-red-200 rounded-lg p-6 shadow-natura"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="flex">
           <div className="flex-shrink-0">
             <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -132,47 +149,93 @@ export default function ProductsTable() {
             <div className="mt-2 text-sm text-red-700">{error}</div>
           </div>
         </div>
-      </div>
+      </motion.div>
     )
   }
 
   return (
-    <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200">
+    <motion.div 
+      className="bg-white shadow-natura rounded-2xl overflow-hidden"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      <div className="px-8 py-6 border-b border-[#e8e8e8] bg-gradient-to-r from-[#f4f1eb] to-white">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">Produtos</h2>
-            <p className="mt-1 text-sm text-gray-600">
-              Total de {products.length} produto{products.length !== 1 ? 's' : ''}
-            </p>
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <motion.button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  selectedCategory === category
+                    ? 'bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white shadow-natura'
+                    : 'bg-white text-[#2c3e50] hover:bg-[#f4f1eb] hover:text-[#8b4513] border border-[#e8e8e8]'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {category === 'all' ? 'Todos' : category}
+              </motion.button>
+            ))}
           </div>
           {isAuthenticated && (
-            <button
+            <motion.button
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-full shadow-natura text-white bg-gradient-to-r from-[#8b4513] to-[#d2691e] hover:from-[#a0522d] hover:to-[#8b4513] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#8b4513] transition-all duration-300 hover-lift"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
+              <Plus className="h-5 w-5 mr-2" />
               Novo Produto
-            </button>
+            </motion.button>
           )}
         </div>
       </div>
+
+
       
-      <div className="p-6">
+      <div className="p-8">
         {products.length === 0 ? (
-          <div className="text-center py-12">
-            <svg className="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
-            <p className="text-lg font-medium text-gray-900">Nenhum produto encontrado</p>
-            <p className="text-sm text-gray-600">Adicione produtos para começar</p>
-          </div>
+          <motion.div 
+            className="text-center py-16"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="w-24 h-24 bg-gradient-to-br from-[#f4f1eb] to-[#e8e8e8] rounded-full flex items-center justify-center mx-auto mb-6">
+              <Package className="h-12 w-12 text-[#8b4513]" />
+            </div>
+            <h3 className="text-2xl font-bold text-[#2c3e50] mb-3">Nenhum produto encontrado</h3>
+            <p className="text-[#7f8c8d] mb-6">Comece adicionando produtos naturais ao seu catálogo</p>
+            {isAuthenticated && (
+              <motion.button
+                onClick={() => setIsModalOpen(true)}
+                className="inline-flex items-center px-6 py-3 border-2 border-[#8b4513] text-[#8b4513] rounded-full font-semibold hover:bg-[#8b4513] hover:text-white transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                Adicionar Primeiro Produto
+              </motion.button>
+            )}
+          </motion.div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <div key={product.id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow relative">
+          <motion.div 
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+          >
+            {filteredProducts.map((product, index) => (
+              <motion.div 
+                key={product.id} 
+                className="bg-white border border-[#e8e8e8] rounded-2xl shadow-natura hover-lift relative overflow-hidden group"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ y: -5 }}
+              >
                 {/* Imagem do Produto */}
                 <div className="relative w-full h-48">
                   <Image
@@ -180,90 +243,96 @@ export default function ProductsTable() {
                     alt={product.name}
                     fill
                     className="object-cover rounded-t-lg cursor-pointer hover:opacity-90 transition-opacity"
-                    onClick={() => handleImageClick(product.image!, product.name)}
+                    onClick={() => handleImageClick(product)}
                     style={{ objectFit: 'cover' }}
                     sizes="(max-width: 768px) 100vw, 25vw"
                     priority={true}
                   />
                   {/* Badge de Status */}
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute top-3 right-3">
                     {product.in_stock ? (
-                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                      <span className="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-[#27ae60]/90 text-white backdrop-blur-sm shadow-sm">
                         Em estoque
                       </span>
                     ) : (
-                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                      <span className="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-[#e74c3c]/90 text-white backdrop-blur-sm shadow-sm">
                         Sem estoque
                       </span>
                     )}
                   </div>
                   {/* Badge de Categoria */}
-                  <div className="absolute top-2 left-2">
+                  <div className="absolute top-3 left-3">
                     {product.category && (
-                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                      <span className="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-[#8b4513]/90 text-white backdrop-blur-sm shadow-sm">
                         {product.category}
                       </span>
                     )}
                   </div>
                 </div>
                 {/* Conteúdo do Card */}
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{product.name}</h3>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-[#2c3e50] mb-3 group-hover:text-[#8b4513] transition-colors duration-300">{product.name}</h3>
                   {product.description && (
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+                    <p className="text-sm text-[#7f8c8d] mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
                   )}
                   {/* Preço */}
-                  <div className="text-xl font-bold text-gray-900 mb-3">
+                  <div className="text-2xl font-bold gradient-text mb-4">
                     {formatPrice(product.price)}
                   </div>
                   {/* Informações Adicionais */}
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+                  <div className="flex items-center justify-between text-sm text-[#7f8c8d] mb-4">
                     <div className="flex items-center">
-                      <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                      </svg>
+                      <Package className="h-4 w-4 mr-2 text-[#8b4513]" />
                       {product.stock !== null ? `${product.stock} em estoque` : 'Estoque não informado'}
                     </div>
                     {product.rating !== null && (
                       <div className="flex items-center">
-                        <svg className="h-4 w-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
+                        <Star className="h-4 w-4 text-[#f39c12] mr-1 fill-current" />
                         {product.rating}/5
                       </div>
                     )}
                   </div>
                   {/* Data de Criação */}
-                  <div className="text-xs text-gray-400 mb-3">
+                  <div className="flex items-center text-xs text-[#7f8c8d] mb-4">
+                    <Calendar className="h-3 w-3 mr-1" />
                     Criado em {formatDate(product.created_at)}
                   </div>
                   {/* Botões de Ação - Apenas para administradores */}
                   {isAuthenticated && (
-                    <div className="flex space-x-2">
-                      <button
+                    <div className="flex space-x-3">
+                      <motion.button
+                        onClick={() => handleImageClick(product)}
+                        className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-[#8b4513] text-[#8b4513] rounded-full text-sm font-medium hover:bg-[#8b4513] hover:text-white transition-all duration-300"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Visualizar
+                      </motion.button>
+                      <motion.button
                         onClick={() => handleEditProduct(product)}
-                        className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                        className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-[#8b4513] text-[#8b4513] rounded-full text-sm font-medium hover:bg-[#8b4513] hover:text-white transition-all duration-300"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                       >
-                        <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
+                        <Edit className="h-4 w-4 mr-2" />
                         Editar
-                      </button>
-                      <button
+                      </motion.button>
+                      <motion.button
                         onClick={() => handleDeleteProduct(product.id.toString())}
-                        className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-red-300 shadow-sm text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                        className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-[#e74c3c] text-[#e74c3c] rounded-full text-sm font-medium hover:bg-[#e74c3c] hover:text-white transition-all duration-300"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                       >
-                        <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                        <Trash2 className="h-4 w-4 mr-2" />
                         Excluir
-                      </button>
+                      </motion.button>
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
 
@@ -283,9 +352,8 @@ export default function ProductsTable() {
       <ImageModal
         isOpen={imageModal.isOpen}
         onClose={() => setImageModal(prev => ({ ...prev, isOpen: false }))}
-        imageUrl={imageModal.imageUrl}
-        productName={imageModal.productName}
+        product={imageModal.product}
       />
-    </div>
+    </motion.div>
   )
 } 

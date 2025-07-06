@@ -51,40 +51,40 @@ export default function AdminLoginForm({ onLogin, onSuccess }: AdminLoginFormPro
 
   return (
     <form onSubmit={handleSubmit} className="max-w-sm mx-auto bg-white p-8 rounded-lg shadow-md space-y-6">
-      <h2 className="text-2xl font-bold text-center text-gray-900">Login do Administrador</h2>
+      <h2 className="text-2xl font-bold text-center text-[#2c3e50]">Login do Administrador</h2>
       
       {/* Credenciais de teste */}
-      <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-        <h3 className="text-sm font-medium text-blue-800 mb-2">Credenciais de Administrador:</h3>
-        <div className="text-xs text-blue-700 space-y-1">
-          <p><strong>Email:</strong> admin@elizacms.com</p>
-          <p><strong>Senha:</strong> ElizaCMS2024!@#</p>
+      <div className="bg-[#f4f1eb] border border-[#e8e8e8] rounded-md p-3">
+        <h3 className="text-sm font-medium text-[#8b4513] mb-2">Credenciais de Administrador:</h3>
+        <div className="text-xs text-[#7f8c8d] space-y-1">
+          <p><strong className="text-[#8b4513]">Email:</strong> admin@elizacms.com</p>
+          <p><strong className="text-[#8b4513]">Senha:</strong> ElizaCMS2024!@#</p>
         </div>
       </div>
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded p-3 text-sm text-center">
+        <div className="bg-red-50 border border-red-200 text-[#e74c3c] rounded p-3 text-sm text-center">
           {error}
         </div>
       )}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+        <label htmlFor="email" className="block text-sm font-medium text-[#2c3e50] mb-1">E-mail</label>
         <input
           id="email"
           type="email"
           autoComplete="username"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-[#e8e8e8] rounded-md shadow-sm focus:outline-none focus:ring-[#8b4513] focus:border-[#8b4513] text-[#2c3e50] placeholder:text-[#7f8c8d]"
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
         />
       </div>
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+        <label htmlFor="password" className="block text-sm font-medium text-[#2c3e50] mb-1">Senha</label>
         <input
           id="password"
           type="password"
           autoComplete="current-password"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-[#e8e8e8] rounded-md shadow-sm focus:outline-none focus:ring-[#8b4513] focus:border-[#8b4513] text-[#2c3e50] placeholder:text-[#7f8c8d]"
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
@@ -93,7 +93,7 @@ export default function AdminLoginForm({ onLogin, onSuccess }: AdminLoginFormPro
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md shadow hover:bg-blue-700 transition-colors disabled:opacity-50"
+        className="w-full py-2 px-4 bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white font-semibold rounded-full shadow-natura hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-300 disabled:opacity-50"
       >
         {loading ? "Entrando..." : "Entrar"}
       </button>
