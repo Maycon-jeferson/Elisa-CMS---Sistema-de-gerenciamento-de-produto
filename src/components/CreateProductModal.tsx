@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, createProduct, uploadImage } from '@/lib/supabase'
+import imageCompression from 'browser-image-compression'
 
 interface CreateProductModalProps {
   isOpen: boolean
@@ -18,7 +19,9 @@ export default function CreateProductModal({ isOpen, onClose, onProductCreated }
     image: '',
     in_stock: true
   })
+  const [imageFile, setImageFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -27,6 +30,11 @@ export default function CreateProductModal({ isOpen, onClose, onProductCreated }
       ...prev,
       [name]: value
     }))
+  }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null
+    setImageFile(file)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,23 +54,35 @@ export default function CreateProductModal({ isOpen, onClose, onProductCreated }
     try {
       setLoading(true)
       setError(null)
+      let imageUrl = ''
+      if (imageFile) {
+        setUploading(true)
+        // Comprimir imagem
+        const compressed = await imageCompression(imageFile, { maxSizeMB: 0.5, maxWidthOrHeight: 800 })
+        // Upload para o Supabase Storage
+        const fileExt = compressed.name.split('.').pop()
+        const fileName = `imagens/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`
+        const uploadedUrl = await uploadImage(compressed, fileName)
+        if (!uploadedUrl) {
+          throw new Error('Erro ao fazer upload da imagem')
+        }
+        imageUrl = uploadedUrl
+        setUploading(false)
+      } else if (formData.image) {
+        imageUrl = formData.image.trim()
+      }
+      
+      const newProduct = await createProduct({
+        name: formData.name.trim(),
+        description: formData.description.trim() || undefined,
+        price: price,
+        category: formData.category.trim(),
+        image: imageUrl || undefined,
+        in_stock: formData.in_stock
+      })
 
-      const { data, error } = await supabase
-        .from('products')
-        .insert([
-          {
-            name: formData.name.trim(),
-            description: formData.description.trim() || null,
-            price: price,
-            category: formData.category.trim(),
-            image: formData.image.trim() || null,
-            in_stock: formData.in_stock
-          }
-        ])
-        .select()
-
-      if (error) {
-        throw error
+      if (!newProduct) {
+        throw new Error('Erro ao criar produto')
       }
 
       // Limpar formulário
@@ -74,6 +94,7 @@ export default function CreateProductModal({ isOpen, onClose, onProductCreated }
         image: '',
         in_stock: true
       })
+      setImageFile(null)
 
       // Fechar modal e atualizar lista
       onClose()
@@ -86,6 +107,7 @@ export default function CreateProductModal({ isOpen, onClose, onProductCreated }
       }
     } finally {
       setLoading(false)
+      setUploading(false)
     }
   }
 
@@ -212,18 +234,19 @@ export default function CreateProductModal({ isOpen, onClose, onProductCreated }
 
             <div>
               <label htmlFor="image" className="block text-sm font-medium text-[#2c3e50] mb-1">
-                URL da Imagem
+                Imagem do Produto
               </label>
               <input
-                type="url"
+                type="file"
                 id="image"
                 name="image"
-                value={formData.image}
-                onChange={handleInputChange}
+                accept="image/*"
+                onChange={handleImageChange}
                 className="w-full px-3 py-2 border border-[#e8e8e8] rounded-md shadow-sm focus:outline-none focus:ring-[#8b4513] focus:border-[#8b4513] text-[#2c3e50] placeholder:text-[#7f8c8d]"
-                placeholder="https://exemplo.com/imagem.jpg"
-                disabled={loading}
+                disabled={loading || uploading}
               />
+              {uploading && <p className="text-xs text-[#8b4513] mt-1">Enviando imagem...</p>}
+              {imageFile && <p className="text-xs text-[#8b4513] mt-1">Imagem selecionada: {imageFile.name}</p>}
             </div>
 
             <div className="flex items-center">

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase, Product } from '@/lib/supabase'
+import { Product, updateProduct } from '@/lib/supabase'
 
 interface EditProductModalProps {
   isOpen: boolean
@@ -17,9 +17,7 @@ export default function EditProductModal({ isOpen, onClose, onProductUpdated, pr
     price: '',
     category: '',
     image: '',
-    in_stock: false,
-    rating: '',
-    stock: ''
+    in_stock: false
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -32,9 +30,7 @@ export default function EditProductModal({ isOpen, onClose, onProductUpdated, pr
         price: product.price.toString(),
         category: product.category || '',
         image: product.image || '',
-        in_stock: product.in_stock || false,
-        rating: product.rating ? product.rating.toString() : '',
-        stock: product.stock ? product.stock.toString() : ''
+        in_stock: product.in_stock || false
       })
     }
   }, [product])
@@ -61,11 +57,12 @@ export default function EditProductModal({ isOpen, onClose, onProductUpdated, pr
         throw new Error('Preço deve ser um número válido maior ou igual a zero')
       }
 
-      // Campos que sabemos que existem na tabela
-      const updateData: Partial<Product> = {
+      // Preparar dados para atualização
+      const updateData: Partial<Omit<Product, 'id'>> = {
         name: formData.name.trim(),
         price: price,
-        category: formData.category.trim()
+        category: formData.category.trim(),
+        in_stock: formData.in_stock
       }
 
       // Adicionar campos opcionais apenas se tiverem valores válidos
@@ -77,30 +74,10 @@ export default function EditProductModal({ isOpen, onClose, onProductUpdated, pr
         updateData.image = formData.image.trim()
       }
 
-      // Campos booleanos e numéricos
-      updateData.in_stock = formData.in_stock
+      const updatedProduct = await updateProduct(product.id, updateData)
 
-      if (formData.rating && !isNaN(parseFloat(formData.rating))) {
-        const rating = parseFloat(formData.rating)
-        if (rating >= 0 && rating <= 5) {
-          updateData.rating = rating
-        }
-      }
-
-      if (formData.stock && !isNaN(parseInt(formData.stock))) {
-        const stock = parseInt(formData.stock)
-        if (stock >= 0) {
-          updateData.stock = stock
-        }
-      }
-
-      const { error } = await supabase
-        .from('products')
-        .update(updateData)
-        .eq('id', product.id)
-
-      if (error) {
-        throw error
+      if (!updatedProduct) {
+        throw new Error('Erro ao atualizar produto')
       }
 
       onProductUpdated()
@@ -225,38 +202,6 @@ export default function EditProductModal({ isOpen, onClose, onProductUpdated, pr
               name="image"
               value={formData.image}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-[#e8e8e8] rounded-md shadow-sm focus:outline-none focus:ring-[#8b4513] focus:border-[#8b4513] text-[#2c3e50] placeholder:text-[#7f8c8d]"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="stock" className="block text-sm font-medium text-[#2c3e50] mb-1">
-              Quantidade em Estoque
-            </label>
-            <input
-              type="number"
-              id="stock"
-              name="stock"
-              value={formData.stock}
-              onChange={handleInputChange}
-              min="0"
-              className="w-full px-3 py-2 border border-[#e8e8e8] rounded-md shadow-sm focus:outline-none focus:ring-[#8b4513] focus:border-[#8b4513] text-[#2c3e50] placeholder:text-[#7f8c8d]"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="rating" className="block text-sm font-medium text-[#2c3e50] mb-1">
-              Avaliação (0-5)
-            </label>
-            <input
-              type="number"
-              id="rating"
-              name="rating"
-              value={formData.rating}
-              onChange={handleInputChange}
-              min="0"
-              max="5"
-              step="0.1"
               className="w-full px-3 py-2 border border-[#e8e8e8] rounded-md shadow-sm focus:outline-none focus:ring-[#8b4513] focus:border-[#8b4513] text-[#2c3e50] placeholder:text-[#7f8c8d]"
             />
           </div>

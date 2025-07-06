@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://zznfzjoyalmwrbejfbpa.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6bmZ6am95YWxtd3JiZWpmYnBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3NTcxNTksImV4cCI6MjA2NzMzMzE1OX0.gTbLUk6zazs7DPlJwMJDvJZL9kO0Svn4PetBMsx9ldk'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zznfzjoyalmwrbejfbpa.supabase.co'
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6bmZ6am95YWxtd3JiZWpmYnBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3NTcxNTksImV4cCI6MjA2NzMzMzE1OX0.gTbLUk6zazs7DPlJwMJDvJZL9kO0Svn4PetBMsx9ldk'
 
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
@@ -28,6 +28,133 @@ export interface SiteSettings {
   updated_at: string
 }
 
+// Função para definir a chave secreta (necessária para operações de escrita)
+const setSecretKey = async () => {
+  try {
+    await supabase.rpc('set_app_secret_key')
+  } catch (error) {
+    console.error('Erro ao definir chave secreta:', error)
+  }
+}
+
+// Função para carregar produtos (leitura pública - não precisa de chave secreta)
+export const loadProducts = async (): Promise<Product[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('id', { ascending: false })
+
+    if (error) {
+      console.error('Erro ao carregar produtos:', error)
+      return []
+    }
+
+    return data || []
+  } catch (err) {
+    console.error('Erro ao carregar produtos:', err)
+    return []
+  }
+}
+
+// Função para criar produto (requer chave secreta)
+export const createProduct = async (product: Omit<Product, 'id'>): Promise<Product | null> => {
+  try {
+    await setSecretKey()
+    
+    const { data, error } = await supabase
+      .from('products')
+      .insert([product])
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Erro ao criar produto:', error)
+      return null
+    }
+
+    return data
+  } catch (err) {
+    console.error('Erro ao criar produto:', err)
+    return null
+  }
+}
+
+// Função para atualizar produto (requer chave secreta)
+export const updateProduct = async (id: number, product: Partial<Omit<Product, 'id'>>): Promise<Product | null> => {
+  try {
+    await setSecretKey()
+    
+    const { data, error } = await supabase
+      .from('products')
+      .update(product)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Erro ao atualizar produto:', error)
+      return null
+    }
+
+    return data
+  } catch (err) {
+    console.error('Erro ao atualizar produto:', err)
+    return null
+  }
+}
+
+// Função para deletar produto (requer chave secreta)
+export const deleteProduct = async (id: number): Promise<boolean> => {
+  try {
+    await setSecretKey()
+    
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Erro ao deletar produto:', error)
+      return false
+    }
+
+    return true
+  } catch (err) {
+    console.error('Erro ao deletar produto:', err)
+    return false
+  }
+}
+
+// Função para fazer upload de imagem (requer chave secreta)
+export const uploadImage = async (file: File, fileName: string): Promise<string | null> => {
+  try {
+    await setSecretKey()
+    
+    const { data, error } = await supabase.storage
+      .from('produtos')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      })
+
+    if (error) {
+      console.error('Erro ao fazer upload da imagem:', error)
+      return null
+    }
+
+    // Retorna a URL pública da imagem
+    const { data: { publicUrl } } = supabase.storage
+      .from('produtos')
+      .getPublicUrl(fileName)
+
+    return publicUrl
+  } catch (err) {
+    console.error('Erro ao fazer upload da imagem:', err)
+    return null
+  }
+}
+
 // Função para carregar configurações do banco
 export const loadSiteSettings = async (): Promise<SiteSettings | null> => {
   try {
@@ -50,9 +177,11 @@ export const loadSiteSettings = async (): Promise<SiteSettings | null> => {
   }
 }
 
-// Função para salvar configurações no banco
+// Função para salvar configurações no banco (requer chave secreta)
 export const saveSiteSettings = async (settings: Omit<SiteSettings, 'id' | 'created_at' | 'updated_at'>): Promise<SiteSettings | null> => {
   try {
+    await setSecretKey()
+    
     const { data, error } = await supabase
       .from('site_settings')
       .insert([settings])
@@ -71,9 +200,11 @@ export const saveSiteSettings = async (settings: Omit<SiteSettings, 'id' | 'crea
   }
 }
 
-// Função para atualizar configurações existentes
+// Função para atualizar configurações existentes (requer chave secreta)
 export const updateSiteSettings = async (id: number, settings: Partial<Omit<SiteSettings, 'id' | 'created_at' | 'updated_at'>>): Promise<SiteSettings | null> => {
   try {
+    await setSecretKey()
+    
     const { data, error } = await supabase
       .from('site_settings')
       .update(settings)

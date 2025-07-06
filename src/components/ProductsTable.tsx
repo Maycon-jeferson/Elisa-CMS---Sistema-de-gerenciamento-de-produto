@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Plus, Package, Trash2, Edit, Eye } from 'lucide-react'
-import { supabase, Product } from '@/lib/supabase'
+import { supabase, Product, loadProducts, deleteProduct } from '@/lib/supabase'
 import CreateProductModal from './CreateProductModal'
 import EditProductModal from './EditProductModal'
 import ImageModal from './ImageModal'
@@ -39,16 +39,8 @@ export default function ProductsTable() {
   const fetchProducts = async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('id', { ascending: false })
-
-      if (error) {
-        throw error
-      }
-
-      setProducts(data || [])
+      const data = await loadProducts()
+      setProducts(data)
     } catch (err) {
       setError(err && typeof err === 'object' && 'message' in err ? String(err.message) : 'Erro ao carregar produtos')
     } finally {
@@ -78,22 +70,18 @@ export default function ProductsTable() {
     })
   }
 
-  const handleDeleteProduct = async (productId: string) => {
+  const handleDeleteProduct = async (productId: number) => {
     if (!confirm('Tem certeza que deseja excluir este produto?')) {
       return
     }
 
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', productId)
-
-      if (error) {
-        throw error
+      const success = await deleteProduct(productId)
+      if (success) {
+        fetchProducts()
+      } else {
+        alert('Erro ao deletar produto')
       }
-
-      fetchProducts()
     } catch (err) {
       alert('Erro ao deletar produto')
     }
@@ -298,7 +286,7 @@ export default function ProductsTable() {
                         Editar
                       </motion.button>
                       <motion.button
-                        onClick={() => handleDeleteProduct(product.id.toString())}
+                        onClick={() => handleDeleteProduct(product.id)}
                         className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-[#e74c3c] text-[#e74c3c] rounded-full text-sm font-medium hover:bg-[#e74c3c] hover:text-white transition-all duration-300"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
