@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase, createProduct, uploadImage } from '@/lib/supabase'
+import { createProduct, uploadImage } from '@/lib/supabase'
 import imageCompression from 'browser-image-compression'
 
 interface CreateProductModalProps {

@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ArrowRight, Sparkles, Leaf, Heart } from 'lucide-react'
+// Nenhuma dessas importações é usada
 import { useSiteSettings } from '@/hooks/useSiteSettings'
 
 interface HeroSectionProps {
@@ -103,7 +103,7 @@ export default function HeroSection({ productCount = 0 }: HeroSectionProps) {
               className="text-lg text-[#8b4513] font-medium mb-8 italic"
               variants={itemVariants}
             >
-              "{settings.slogan}"
+              &quot;{settings.slogan}&quot;
             </motion.p>
           )}
 

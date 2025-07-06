@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Plus, Package, Trash2, Edit, Eye } from 'lucide-react'
-import { supabase, Product, loadProducts, deleteProduct } from '@/lib/supabase'
+import { Product, loadProducts, deleteProduct } from '@/lib/supabase'
 import CreateProductModal from './CreateProductModal'
 import EditProductModal from './EditProductModal'
 import ImageModal from './ImageModal'
@@ -41,8 +41,8 @@ export default function ProductsTable() {
       setLoading(true)
       const data = await loadProducts()
       setProducts(data)
-    } catch (err) {
-      setError(err && typeof err === 'object' && 'message' in err ? String(err.message) : 'Erro ao carregar produtos')
+    } catch {
+      setError('Erro ao carregar produtos')
     } finally {
       setLoading(false)
     }

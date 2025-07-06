@@ -42,7 +42,7 @@ export default function AdminLoginForm({ onLogin, onSuccess }: AdminLoginFormPro
           setError("E-mail ou senha incorretos.")
         }
       }
-    } catch (error) {
+    } catch {
       setError("Erro ao fazer login.")
     } finally {
       setLoading(false)

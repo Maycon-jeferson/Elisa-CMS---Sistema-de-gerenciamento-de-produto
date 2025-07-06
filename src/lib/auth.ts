@@ -24,7 +24,7 @@ export class AuthService {
       // Verificar senha com bcrypt
       const isValid = await bcrypt.compare(password, ADMIN_PASSWORD_HASH)
       return isValid
-    } catch (error) {
+    } catch {
       return false
     }
   }
@@ -60,7 +60,7 @@ export class AuthService {
         iat: decoded.timestamp,
         exp: decoded.timestamp + maxAge
       }
-    } catch (error) {
+    } catch {
       return null
     }
   }

@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Flower, MessageCircle, User, Menu, X } from 'lucide-react'
+import { Flower, MessageCircle, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import AdminLoginModal from './AdminLoginModal'
 import { useSiteSettings } from '@/hooks/useSiteSettings'

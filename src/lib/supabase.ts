@@ -151,7 +151,7 @@ export const uploadImage = async (file: File, fileName: string): Promise<string 
     }
     
     // Tentar upload direto primeiro (para desenvolvimento)
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from(bucketName)
       .upload(fileName, file, {
         cacheControl: '3600',
@@ -164,7 +164,7 @@ export const uploadImage = async (file: File, fileName: string): Promise<string 
               // Se falhar, tentar com chave secreta
         try {
           await setSecretKey()
-          const { data: retryData, error: retryError } = await supabase.storage
+          const { error: retryError } = await supabase.storage
             .from(bucketName)
             .upload(fileName, file, {
               cacheControl: '3600',

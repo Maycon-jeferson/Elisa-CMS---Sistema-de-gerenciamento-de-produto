@@ -13,7 +13,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [loading, setLoading] = useState(true)
   
   // Verificar token ao inicializar (apenas no cliente)
   useEffect(() => {
@@ -28,7 +27,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     }
-    setLoading(false)
   }, [])
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -47,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       return false
-    } catch (error) {
+    } catch {
       return false
     }
   }
