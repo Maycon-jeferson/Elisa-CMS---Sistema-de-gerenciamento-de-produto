@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, Package, Star, Calendar, Trash2, Edit, Eye } from 'lucide-react'
+import { Plus, Package, Trash2, Edit, Eye } from 'lucide-react'
 import { supabase, Product } from '@/lib/supabase'
 import CreateProductModal from './CreateProductModal'
 import EditProductModal from './EditProductModal'
@@ -42,7 +42,7 @@ export default function ProductsTable() {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
 
       if (error) {
         throw error
@@ -61,10 +61,6 @@ export default function ProductsTable() {
       style: 'currency',
       currency: 'BRL'
     }).format(price)
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR')
   }
 
   const handleProductCreated = () => {
@@ -279,24 +275,7 @@ export default function ProductsTable() {
                   <div className="text-2xl font-bold gradient-text mb-4">
                     {formatPrice(product.price)}
                   </div>
-                  {/* Informações Adicionais */}
-                  <div className="flex items-center justify-between text-sm text-[#7f8c8d] mb-4">
-                    <div className="flex items-center">
-                      <Package className="h-4 w-4 mr-2 text-[#8b4513]" />
-                      {product.stock !== null ? `${product.stock} em estoque` : 'Estoque não informado'}
-                    </div>
-                    {product.rating !== null && (
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-[#f39c12] mr-1 fill-current" />
-                        {product.rating}/5
-                      </div>
-                    )}
-                  </div>
-                  {/* Data de Criação */}
-                  <div className="flex items-center text-xs text-[#7f8c8d] mb-4">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    Criado em {formatDate(product.created_at)}
-                  </div>
+
                   {/* Botões de Ação - Apenas para administradores */}
                   {isAuthenticated && (
                     <div className="flex space-x-3">

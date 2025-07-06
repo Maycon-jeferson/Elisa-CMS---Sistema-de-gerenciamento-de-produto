@@ -180,21 +180,21 @@ export default function AdminLoginModal() {
                     </div>
                     <div>
                       <h2 className="text-xl font-bold text-[#2c3e50]">Configurações do Site</h2>
-                      <p className="text-sm text-[#7f8c8d]">Personalize as informações do seu site</p>
+                      <p className="text-sm text-[#8b4513]">Personalize as informações do seu site</p>
                     </div>
                   </div>
 
                   {loading ? (
                     <div className="flex items-center justify-center py-8">
                       <Loader2 className="h-8 w-8 text-[#8b4513] animate-spin" />
-                      <span className="ml-3 text-[#7f8c8d]">Carregando configurações...</span>
+                      <span className="ml-3 text-[#8b4513]">Carregando configurações...</span>
                     </div>
                   ) : (
                     <>
                       <div className="space-y-4">
                         {/* Número do WhatsApp */}
                         <div>
-                          <label className="block text-sm font-medium text-[#2c3e50] mb-2">
+                          <label className="block text-sm font-semibold text-[#2c3e50] mb-2">
                             Número do WhatsApp
                           </label>
                           <input
@@ -202,14 +202,14 @@ export default function AdminLoginModal() {
                             value={settings.whatsappNumber}
                             onChange={(e) => setSettings(prev => ({ ...prev, whatsappNumber: e.target.value }))}
                             placeholder="5511999999999"
-                            className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg focus:ring-2 focus:ring-[#8b4513] focus:border-transparent transition-all duration-200"
+                            className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg focus:ring-2 focus:ring-[#8b4513] focus:border-transparent transition-all duration-200 text-[#2c3e50] placeholder-[#a8a8a8]"
                           />
-                          <p className="text-xs text-[#7f8c8d] mt-1">Digite apenas números, sem espaços ou caracteres especiais</p>
+                          <p className="text-xs text-[#8b4513] mt-1">Digite apenas números, sem espaços ou caracteres especiais</p>
                         </div>
 
                         {/* Nome do Site */}
                         <div>
-                          <label className="block text-sm font-medium text-[#2c3e50] mb-2">
+                          <label className="block text-sm font-semibold text-[#2c3e50] mb-2">
                             Nome do Site
                           </label>
                           <input
@@ -217,13 +217,13 @@ export default function AdminLoginModal() {
                             value={settings.siteName}
                             onChange={(e) => setSettings(prev => ({ ...prev, siteName: e.target.value }))}
                             placeholder="Eliza CMS"
-                            className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg focus:ring-2 focus:ring-[#8b4513] focus:border-transparent transition-all duration-200"
+                            className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg focus:ring-2 focus:ring-[#8b4513] focus:border-transparent transition-all duration-200 text-[#2c3e50] placeholder-[#a8a8a8]"
                           />
                         </div>
 
                         {/* Título */}
                         <div>
-                          <label className="block text-sm font-medium text-[#2c3e50] mb-2">
+                          <label className="block text-sm font-semibold text-[#2c3e50] mb-2">
                             Título Principal
                           </label>
                           <input
@@ -231,13 +231,13 @@ export default function AdminLoginModal() {
                             value={settings.title}
                             onChange={(e) => setSettings(prev => ({ ...prev, title: e.target.value }))}
                             placeholder="Catálogo de Produtos Naturais"
-                            className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg focus:ring-2 focus:ring-[#8b4513] focus:border-transparent transition-all duration-200"
+                            className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg focus:ring-2 focus:ring-[#8b4513] focus:border-transparent transition-all duration-200 text-[#2c3e50] placeholder-[#a8a8a8]"
                           />
                         </div>
 
                         {/* Subtítulo */}
                         <div>
-                          <label className="block text-sm font-medium text-[#2c3e50] mb-2">
+                          <label className="block text-sm font-semibold text-[#2c3e50] mb-2">
                             Subtítulo
                           </label>
                           <input
@@ -245,13 +245,13 @@ export default function AdminLoginModal() {
                             value={settings.subtitle}
                             onChange={(e) => setSettings(prev => ({ ...prev, subtitle: e.target.value }))}
                             placeholder="Descubra produtos naturais de qualidade"
-                            className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg focus:ring-2 focus:ring-[#8b4513] focus:border-transparent transition-all duration-200"
+                            className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg focus:ring-2 focus:ring-[#8b4513] focus:border-transparent transition-all duration-200 text-[#2c3e50] placeholder-[#a8a8a8]"
                           />
                         </div>
 
                         {/* Slogan */}
                         <div>
-                          <label className="block text-sm font-medium text-[#2c3e50] mb-2">
+                          <label className="block text-sm font-semibold text-[#2c3e50] mb-2">
                             Slogan
                           </label>
                           <input
@@ -259,7 +259,7 @@ export default function AdminLoginModal() {
                             value={settings.slogan}
                             onChange={(e) => setSettings(prev => ({ ...prev, slogan: e.target.value }))}
                             placeholder="Naturais como a natureza"
-                            className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg focus:ring-2 focus:ring-[#8b4513] focus:border-transparent transition-all duration-200"
+                            className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg focus:ring-2 focus:ring-[#8b4513] focus:border-transparent transition-all duration-200 text-[#2c3e50] placeholder-[#a8a8a8]"
                           />
                         </div>
                       </div>
@@ -268,7 +268,7 @@ export default function AdminLoginModal() {
                       <div className="flex space-x-3 mt-6">
                         <motion.button
                           onClick={() => setSettingsOpen(false)}
-                          className="flex-1 px-4 py-3 border border-[#e8e8e8] text-[#7f8c8d] rounded-lg font-medium hover:bg-[#f4f1eb] transition-all duration-200"
+                          className="flex-1 px-4 py-3 border border-[#e8e8e8] text-[#8b4513] rounded-lg font-medium hover:bg-[#f4f1eb] transition-all duration-200"
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           disabled={saving}

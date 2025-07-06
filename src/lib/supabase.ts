@@ -14,9 +14,6 @@ export interface Product {
   category: string
   image?: string
   in_stock?: boolean
-  rating?: number
-  stock?: number
-  created_at: string
 }
 
 // Tipo para as configurações do site

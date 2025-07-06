@@ -16,9 +16,7 @@ export default function CreateProductModal({ isOpen, onClose, onProductCreated }
     price: '',
     category: '',
     image: '',
-    in_stock: true,
-    rating: '',
-    stock: ''
+    in_stock: true
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -49,9 +47,6 @@ export default function CreateProductModal({ isOpen, onClose, onProductCreated }
       setLoading(true)
       setError(null)
 
-      const rating = formData.rating ? parseFloat(formData.rating) : null
-      const stock = formData.stock ? parseInt(formData.stock) : null
-
       const { data, error } = await supabase
         .from('products')
         .insert([
@@ -61,9 +56,7 @@ export default function CreateProductModal({ isOpen, onClose, onProductCreated }
             price: price,
             category: formData.category.trim(),
             image: formData.image.trim() || null,
-            in_stock: formData.in_stock,
-            rating: rating,
-            stock: stock
+            in_stock: formData.in_stock
           }
         ])
         .select()
@@ -79,9 +72,7 @@ export default function CreateProductModal({ isOpen, onClose, onProductCreated }
         price: '',
         category: '',
         image: '',
-        in_stock: true,
-        rating: '',
-        stock: ''
+        in_stock: true
       })
 
       // Fechar modal e atualizar lista
@@ -106,9 +97,7 @@ export default function CreateProductModal({ isOpen, onClose, onProductCreated }
         price: '',
         category: '',
         image: '',
-        in_stock: true,
-        rating: '',
-        stock: ''
+        in_stock: true
       })
       setError(null)
       onClose()
@@ -235,44 +224,6 @@ export default function CreateProductModal({ isOpen, onClose, onProductCreated }
                 placeholder="https://exemplo.com/imagem.jpg"
                 disabled={loading}
               />
-            </div>
-
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label htmlFor="stock" className="block text-sm font-medium text-[#2c3e50] mb-1">
-                  Estoque
-                </label>
-                <input
-                  type="number"
-                  id="stock"
-                  name="stock"
-                  value={formData.stock}
-                  onChange={handleInputChange}
-                  min="0"
-                  className="w-full px-3 py-2 border border-[#e8e8e8] rounded-md shadow-sm focus:outline-none focus:ring-[#8b4513] focus:border-[#8b4513] text-[#2c3e50] placeholder:text-[#7f8c8d]"
-                  placeholder="0"
-                  disabled={loading}
-                />
-              </div>
-              
-              <div className="flex-1">
-                <label htmlFor="rating" className="block text-sm font-medium text-[#2c3e50] mb-1">
-                  Avaliação
-                </label>
-                <input
-                  type="number"
-                  id="rating"
-                  name="rating"
-                  value={formData.rating}
-                  onChange={handleInputChange}
-                  min="0"
-                  max="5"
-                  step="0.1"
-                  className="w-full px-3 py-2 border border-[#e8e8e8] rounded-md shadow-sm focus:outline-none focus:ring-[#8b4513] focus:border-[#8b4513] text-[#2c3e50] placeholder:text-[#7f8c8d]"
-                  placeholder="0.0"
-                  disabled={loading}
-                />
-              </div>
             </div>
 
             <div className="flex items-center">

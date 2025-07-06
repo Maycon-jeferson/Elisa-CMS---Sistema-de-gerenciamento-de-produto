@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { MessageCircle, Package, Star, Calendar, X } from 'lucide-react'
+import { MessageCircle, X } from 'lucide-react'
 import { Product } from '@/lib/supabase'
 import { useSiteSettings } from '@/hooks/useSiteSettings'
 
@@ -22,10 +22,6 @@ export default function ImageModal({ isOpen, onClose, product }: ImageModalProps
       style: 'currency',
       currency: 'BRL'
     }).format(price)
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR')
   }
 
   const handleWhatsAppClick = () => {
@@ -120,48 +116,6 @@ export default function ImageModal({ isOpen, onClose, product }: ImageModalProps
                         Sem estoque
                       </span>
                     )}
-                  </div>
-                </div>
-
-                {/* Quantidade em Estoque */}
-                {product.stock !== null && (
-                  <div>
-                    <h4 className="text-lg font-semibold text-[#2c3e50] mb-2">Quantidade</h4>
-                    <div className="flex items-center text-[#7f8c8d]">
-                      <Package className="h-5 w-5 mr-2 text-[#8b4513]" />
-                      <span>{product.stock} unidades disponíveis</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Avaliação */}
-                {product.rating !== null && (
-                  <div>
-                    <h4 className="text-lg font-semibold text-[#2c3e50] mb-2">Avaliação</h4>
-                    <div className="flex items-center">
-                      <div className="flex items-center mr-3">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star 
-                            key={star}
-                            className={`h-5 w-5 ${
-                              star <= product.rating! 
-                                ? 'text-[#f39c12] fill-current' 
-                                : 'text-[#e8e8e8]'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-[#7f8c8d] font-medium">{product.rating}/5</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Data de Criação */}
-                <div>
-                  <h4 className="text-lg font-semibold text-[#2c3e50] mb-2">Data de Cadastro</h4>
-                  <div className="flex items-center text-[#7f8c8d]">
-                    <Calendar className="h-5 w-5 mr-2 text-[#8b4513]" />
-                    <span>{formatDate(product.created_at)}</span>
                   </div>
                 </div>
 
