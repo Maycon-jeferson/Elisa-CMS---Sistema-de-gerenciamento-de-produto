@@ -1,0 +1,299 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { supabase, Product } from '@/lib/supabase'
+
+interface EditProductModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onProductUpdated: () => void
+  product: Product | null
+}
+
+export default function EditProductModal({ isOpen, onClose, onProductUpdated, product }: EditProductModalProps) {
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    price: '',
+    category: '',
+    image: '',
+    in_stock: false,
+    rating: '',
+    stock: ''
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (product) {
+      setFormData({
+        name: product.name,
+        description: product.description || '',
+        price: product.price.toString(),
+        category: product.category || '',
+        image: product.image || '',
+        in_stock: product.in_stock || false,
+        rating: product.rating ? product.rating.toString() : '',
+        stock: product.stock ? product.stock.toString() : ''
+      })
+    }
+  }, [product])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!product) return
+
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Validação dos dados
+      if (!formData.name.trim()) {
+        throw new Error('Nome é obrigatório')
+      }
+
+      if (!formData.category.trim()) {
+        throw new Error('Categoria é obrigatória')
+      }
+
+      const price = parseFloat(formData.price)
+      if (isNaN(price) || price < 0) {
+        throw new Error('Preço deve ser um número válido maior ou igual a zero')
+      }
+
+      // Campos que sabemos que existem na tabela
+      const updateData: Partial<Product> = {
+        name: formData.name.trim(),
+        price: price,
+        category: formData.category.trim()
+      }
+
+      // Adicionar campos opcionais apenas se tiverem valores válidos
+      if (formData.description.trim()) {
+        updateData.description = formData.description.trim()
+      }
+
+      if (formData.image.trim()) {
+        updateData.image = formData.image.trim()
+      }
+
+      // Campos booleanos e numéricos
+      updateData.in_stock = formData.in_stock
+
+      if (formData.rating && !isNaN(parseFloat(formData.rating))) {
+        const rating = parseFloat(formData.rating)
+        if (rating >= 0 && rating <= 5) {
+          updateData.rating = rating
+        }
+      }
+
+      if (formData.stock && !isNaN(parseInt(formData.stock))) {
+        const stock = parseInt(formData.stock)
+        if (stock >= 0) {
+          updateData.stock = stock
+        }
+      }
+
+      const { error } = await supabase
+        .from('products')
+        .update(updateData)
+        .eq('id', product.id)
+
+      if (error) {
+        throw error
+      }
+
+      onProductUpdated()
+      onClose()
+    } catch (err) {
+      setError(err && typeof err === 'object' && 'message' in err ? String(err.message) : 'Erro ao atualizar produto')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+    }))
+  }
+
+  if (!isOpen || !product) return null
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900">Editar Produto</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-3">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              Nome *
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+              Descrição
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+              Preço *
+            </label>
+            <input
+              type="number"
+              id="price"
+              name="price"
+              value={formData.price}
+              onChange={handleInputChange}
+              required
+              min="0"
+              step="0.01"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+              Categoria *
+            </label>
+            <input
+              type="text"
+              id="category"
+              name="category"
+              value={formData.category}
+              onChange={handleInputChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
+              URL da Imagem
+            </label>
+            <input
+              type="url"
+              id="image"
+              name="image"
+              value={formData.image}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="stock" className="block text-sm font-medium text-gray-700 mb-1">
+              Quantidade em Estoque
+            </label>
+            <input
+              type="number"
+              id="stock"
+              name="stock"
+              value={formData.stock}
+              onChange={handleInputChange}
+              min="0"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="rating" className="block text-sm font-medium text-gray-700 mb-1">
+              Avaliação (0-5)
+            </label>
+            <input
+              type="number"
+              id="rating"
+              name="rating"
+              value={formData.rating}
+              onChange={handleInputChange}
+              min="0"
+              max="5"
+              step="0.1"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="in_stock"
+              name="in_stock"
+              checked={formData.in_stock}
+              onChange={handleInputChange}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="in_stock" className="ml-2 block text-sm text-gray-700">
+              Em estoque
+            </label>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Salvando...' : 'Salvar Alterações'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+} 
