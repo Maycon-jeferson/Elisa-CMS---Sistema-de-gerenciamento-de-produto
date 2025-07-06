@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useAuth } from "@/contexts/AuthContext"
 
 interface AdminLoginFormProps {
-  onLogin?: (email: string, password: string) => Promise<void> | void
+  onLogin?: (email: string, password: string) => Promise<void>
   onSuccess?: () => void
 }
 
@@ -36,14 +36,14 @@ export default function AdminLoginForm({ onLogin, onSuccess }: AdminLoginFormPro
         const success = await login(email, password)
         
         if (success) {
-          alert("Login de administrador bem-sucedido!")
           onSuccess?.()
         } else {
           setError("E-mail ou senha incorretos.")
         }
       }
-    } catch {
-      setError("Erro ao fazer login.")
+    } catch (error) {
+      console.error('Erro no login:', error)
+      setError("Erro ao fazer login. Verifique sua conexão.")
     } finally {
       setLoading(false)
     }
@@ -88,6 +88,12 @@ export default function AdminLoginForm({ onLogin, onSuccess }: AdminLoginFormPro
       >
         {loading ? "Entrando..." : "Entrar"}
       </button>
+      
+      <div className="text-xs text-center text-[#7f8c8d] mt-4">
+        <p>Credenciais padrão:</p>
+        <p>E-mail: admin@elizacms.com</p>
+        <p>Senha: admin123</p>
+      </div>
     </form>
   )
 } 

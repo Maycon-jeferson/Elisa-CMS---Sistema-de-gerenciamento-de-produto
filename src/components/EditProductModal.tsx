@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Product, updateProduct } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface EditProductModalProps {
   isOpen: boolean
@@ -11,6 +12,7 @@ interface EditProductModalProps {
 }
 
 export default function EditProductModal({ isOpen, onClose, onProductUpdated, product }: EditProductModalProps) {
+  const { currentAdmin } = useAuth()
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -74,7 +76,11 @@ export default function EditProductModal({ isOpen, onClose, onProductUpdated, pr
         updateData.image = formData.image.trim()
       }
 
-      const updatedProduct = await updateProduct(product.id, updateData)
+      if (!currentAdmin?.email) {
+        throw new Error('Admin não autenticado')
+      }
+
+      const updatedProduct = await updateProduct(product.id, updateData, currentAdmin.email)
 
       if (!updatedProduct) {
         throw new Error('Erro ao atualizar produto')

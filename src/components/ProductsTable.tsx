@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import Image from 'next/image'
 
 export default function ProductsTable() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, currentAdmin } = useAuth()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -76,14 +76,24 @@ export default function ProductsTable() {
     }
 
     try {
-      const success = await deleteProduct(productId)
+      console.log('Tentando deletar produto:', { productId, adminEmail: currentAdmin?.email })
+
+      if (!currentAdmin?.email) {
+        alert('Admin não autenticado')
+        return
+      }
+
+      const success = await deleteProduct(productId, currentAdmin.email)
+      console.log('Resultado do deleteProduct:', success)
+
       if (success) {
         fetchProducts()
       } else {
         alert('Erro ao deletar produto')
       }
-    } catch {
-      alert('Erro ao deletar produto')
+    } catch (err) {
+      console.error('Erro ao deletar produto:', err)
+      alert('Erro ao deletar produto: ' + (err?.message || err))
     }
   }
 

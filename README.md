@@ -7,10 +7,12 @@ Um sistema moderno e elegante para gerenciamento de produtos naturais, inspirado
 - **Design Inspirado na Natura**: Interface elegante com cores naturais e gradientes suaves
 - **Animações Fluidas**: Transições suaves usando Framer Motion
 - **Responsivo**: Funciona perfeitamente em desktop, tablet e mobile
-- **Autenticação Segura**: Sistema de login administrativo
+- **Autenticação Segura**: Sistema de login baseado em banco de dados
 - **Gestão de Produtos**: CRUD completo para produtos naturais
 - **Upload de Imagens**: Suporte para imagens de produtos
 - **Interface Moderna**: Componentes elegantes com hover effects
+- **Open Source**: Código aberto e seguro para projetos comerciais
+- **Segurança em Produção**: AdminManager automaticamente removido
 
 ## 🎨 Design System
 
@@ -35,11 +37,11 @@ Um sistema moderno e elegante para gerenciamento de produtos naturais, inspirado
 - **Framer Motion** - Animações
 - **Supabase** - Backend e banco de dados
 - **Lucide React** - Ícones
-- **Headless UI** - Componentes acessíveis
+- **Bcrypt.js** - Hash de senhas
 
 ## 📦 Instalação
 
-```bashas
+```bash
 # Clone o repositório
 git clone git@github.com:Maycon-jeferson/elizacms.git
 
@@ -58,12 +60,41 @@ npm run dev
 
 ## 🔧 Configuração
 
+### 1. Supabase Setup
+
 1. Crie uma conta no [Supabase](https://supabase.com)
 2. Configure as variáveis de ambiente no arquivo `.env.local`:
    ```
    NEXT_PUBLIC_SUPABASE_URL=sua_url_do_supabase
    NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima
    ```
+
+### 2. Banco de Dados
+
+Execute os scripts SQL na seguinte ordem:
+
+1. **Tabela de produtos**: Execute `storage_setup.sql` ou `storage_setup_dev.sql`
+2. **Tabela de configurações**: Execute `database_setup.sql`
+3. **Tabela de admins**: Execute `admins_setup.sql`
+
+### 3. Autenticação
+
+Após executar o script `admins_setup.sql`, você terá acesso com:
+
+- **E-mail**: `admin@elizacms.com`
+- **Senha**: `admin123`
+
+⚠️ **IMPORTANTE**: Altere essas credenciais em produção!
+
+Para mais detalhes sobre autenticação, consulte [AUTH_SETUP.md](AUTH_SETUP.md).
+
+### 4. Permissões de Administrador
+
+Execute os scripts de permissões para configurar o acesso via interface web:
+
+1. **Permissões para interface web**: Execute `web_admin_permissions.sql`
+
+Para mais detalhes sobre gerenciamento via interface web, consulte [WEB_ADMIN_GUIDE.md](WEB_ADMIN_GUIDE.md).
 
 ## 📱 Funcionalidades
 
@@ -74,12 +105,43 @@ npm run dev
 - Interface responsiva
 
 ### Para Administradores
-- Login seguro
+- Login seguro baseado em banco de dados
 - Criação de produtos
 - Edição de informações
 - Upload de imagens
 - Exclusão de produtos
 - Gestão de estoque
+- Configurações do site
+- Gerenciamento de administradores (apenas desenvolvimento)
+- **Gerenciamento via interface web** (produção)
+- **Funções seguras** para operações no banco
+- **Validação de autenticação** em todas as operações
+
+## 🔐 Segurança
+
+- **Autenticação**: Baseada em banco de dados com bcrypt
+- **RLS**: Row Level Security configurado
+- **Tokens**: JWT simples com expiração
+- **Validação**: Todos os formulários validados
+- **Open Source**: Código transparente e auditável
+- **Produção Segura**: AdminManager automaticamente removido
+
+## 🛠️ Desenvolvimento vs Produção
+
+### Desenvolvimento
+- ✅ AdminManager disponível em `/admin`
+- ✅ Interface para criar/gerenciar admins
+- ✅ Botão de administração visível
+- ✅ Logs detalhados
+
+### Produção
+- ❌ AdminManager completamente removido
+- ❌ Página `/admin` redireciona para home
+- ❌ Botão de administração oculto
+- ✅ Gerenciamento via interface web
+- ✅ Políticas RLS configuradas
+- ✅ Funções seguras para operações
+- ✅ Validação de autenticação
 
 ## 🎯 Próximas Funcionalidades
 
@@ -89,6 +151,8 @@ npm run dev
 - [ ] Relatórios de vendas
 - [ ] Integração com pagamentos
 - [ ] App mobile
+- [ ] Autenticação OAuth
+- [ ] Logs de auditoria
 
 ## 🤝 Contribuição
 

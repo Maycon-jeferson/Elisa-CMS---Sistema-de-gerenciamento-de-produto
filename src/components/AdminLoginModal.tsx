@@ -4,11 +4,12 @@ import { useState, useEffect } from "react"
 import AdminLoginForm from "./AdminLoginForm"
 import { useAuth } from "@/contexts/AuthContext"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Settings, Save, Loader2, User } from "lucide-react"
+import { X, Settings, Save, Loader2, User, LogOut, Shield } from "lucide-react"
 import { loadSiteSettings, saveSiteSettings, updateSiteSettings, SiteSettings } from "@/lib/supabase"
+import Link from "next/link"
 
 export default function AdminLoginModal() {
-  const { isAuthenticated, logout } = useAuth()
+  const { isAuthenticated, currentAdmin, logout } = useAuth()
   const [open, setOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -63,61 +64,76 @@ export default function AdminLoginModal() {
 
       let result
       if (currentSettings) {
-        // Atualizar configurações existentes
         result = await updateSiteSettings(currentSettings.id, settingsData)
       } else {
-        // Criar novas configurações
         result = await saveSiteSettings(settingsData)
       }
 
       if (result) {
         setCurrentSettings(result)
-        // Salvar também no localStorage como fallback
-        localStorage.setItem('siteSettings', JSON.stringify({
-          whatsappNumber: settings.whatsappNumber,
-          siteName: settings.siteName,
-          title: settings.title,
-          subtitle: settings.subtitle,
-          slogan: settings.slogan
-        }))
+        alert('Configurações salvas com sucesso!')
         setSettingsOpen(false)
+      } else {
+        alert('Erro ao salvar configurações.')
       }
     } catch (error) {
       console.error('Erro ao salvar configurações:', error)
+      alert('Erro ao salvar configurações.')
     } finally {
       setSaving(false)
     }
   }
 
+  const handleLogout = () => {
+    logout()
+    setOpen(false)
+    setSettingsOpen(false)
+  }
+
   return (
     <>
-      {isAuthenticated ? (
-        <div className="flex items-center space-x-2">
-          <motion.button
-            onClick={() => setSettingsOpen(true)}
-            className="p-0 w-8 h-8 flex items-center justify-center bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white rounded-full shadow-natura font-semibold hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-300"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Settings className="h-4 w-4" />
-            <span className="sr-only">Configurações</span>
-          </motion.button>
-          <button
-            onClick={logout}
-            className="px-4 py-2 bg-red-600 text-white rounded-md shadow hover:bg-red-700 transition-colors"
-          >
-            Logout
-          </button>
-        </div>
-      ) : (
+      {/* Botão de Admin */}
+      {!isAuthenticated ? (
         <button
           onClick={() => setOpen(true)}
-          className="p-0 w-8 h-8 flex items-center justify-center bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white rounded-full shadow-natura font-semibold hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-300"
-          title="Login Administrador"
+          className="fixed bottom-4 right-4 bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white p-3 rounded-full shadow-lg hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#8b4513] focus:ring-offset-2"
+          aria-label="Login do Administrador"
         >
-          <User className="h-4 w-4" />
-          <span className="sr-only">Login Administrador</span>
+          <User className="h-6 w-6" />
         </button>
+      ) : (
+        <div className="fixed bottom-4 right-4 flex flex-col gap-2">
+          {/* Botão de Configurações */}
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white p-3 rounded-full shadow-lg hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#8b4513] focus:ring-offset-2"
+            aria-label="Configurações"
+          >
+            <Settings className="h-6 w-6" />
+          </button>
+          
+          {/* Botão de Administração (apenas em desenvolvimento) */}
+          {process.env.NODE_ENV === 'development' && (
+            <Link
+              href="/admin"
+              className="bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              aria-label="Painel de Administração"
+              title="Painel de Administração (DEV)"
+            >
+              <Shield className="h-6 w-6" />
+            </Link>
+          )}
+          
+          {/* Botão de Logout */}
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 text-white p-3 rounded-full shadow-lg hover:bg-red-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            aria-label="Sair"
+            title={`Sair (${currentAdmin?.name})`}
+          >
+            <LogOut className="h-6 w-6" />
+          </button>
+        </div>
       )}
 
       {/* Modal de Login */}
@@ -206,7 +222,6 @@ export default function AdminLoginModal() {
                             placeholder="5511999999999"
                             className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg focus:ring-2 focus:ring-[#8b4513] focus:border-transparent transition-all duration-200 text-[#2c3e50] placeholder-[#a8a8a8]"
                           />
-                          <p className="text-xs text-[#8b4513] mt-1">Digite apenas números, sem espaços ou caracteres especiais</p>
                         </div>
 
                         {/* Nome do Site */}
@@ -266,36 +281,25 @@ export default function AdminLoginModal() {
                         </div>
                       </div>
 
-                      {/* Botões */}
-                      <div className="flex space-x-3 mt-6">
-                        <motion.button
-                          onClick={() => setSettingsOpen(false)}
-                          className="flex-1 px-4 py-3 border border-[#e8e8e8] text-[#8b4513] rounded-lg font-medium hover:bg-[#f4f1eb] transition-all duration-200"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          disabled={saving}
-                        >
-                          Cancelar
-                        </motion.button>
-                        <motion.button
+                      {/* Botão Salvar */}
+                      <div className="mt-6">
+                        <button
                           onClick={handleSaveSettings}
-                          className="flex-1 px-4 py-3 bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white rounded-lg font-semibold hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                          whileHover={{ scale: saving ? 1 : 1.02 }}
-                          whileTap={{ scale: saving ? 1 : 0.98 }}
                           disabled={saving}
+                          className="w-full py-3 px-4 bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white font-semibold rounded-lg shadow-natura hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-300 disabled:opacity-50 flex items-center justify-center"
                         >
                           {saving ? (
                             <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              <span>Salvando...</span>
+                              <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                              Salvando...
                             </>
                           ) : (
                             <>
-                              <Save className="h-4 w-4" />
-                              <span>Salvar</span>
+                              <Save className="h-5 w-5 mr-2" />
+                              Salvar Configurações
                             </>
                           )}
-                        </motion.button>
+                        </button>
                       </div>
                     </>
                   )}

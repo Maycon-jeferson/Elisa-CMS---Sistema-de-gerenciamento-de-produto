@@ -28,16 +28,7 @@ export interface SiteSettings {
   updated_at: string
 }
 
-// Função para definir a chave secreta (necessária para operações de escrita)
-const setSecretKey = async () => {
-  try {
-    await supabase.rpc('set_app_secret_key')
-  } catch (error) {
-    console.error('Erro ao definir chave secreta:', error)
-  }
-}
-
-// Função para carregar produtos (leitura pública - não precisa de chave secreta)
+// Função para carregar produtos (leitura pública)
 export const loadProducts = async (): Promise<Product[]> => {
   try {
     const { data, error } = await supabase
@@ -57,11 +48,16 @@ export const loadProducts = async (): Promise<Product[]> => {
   }
 }
 
-// Função para criar produto (requer chave secreta)
-export const createProduct = async (product: Omit<Product, 'id'>): Promise<Product | null> => {
+// Função para criar produto (requer autenticação de admin)
+export const createProduct = async (product: Omit<Product, 'id'>, adminEmail: string): Promise<Product | null> => {
   try {
-    await setSecretKey()
-    
+    // Verificar se o admin está autenticado
+    if (!adminEmail) {
+      console.error('Email do admin não fornecido')
+      return null
+    }
+
+    // Inserir produto diretamente
     const { data, error } = await supabase
       .from('products')
       .insert([product])
@@ -80,11 +76,16 @@ export const createProduct = async (product: Omit<Product, 'id'>): Promise<Produ
   }
 }
 
-// Função para atualizar produto (requer chave secreta)
-export const updateProduct = async (id: number, product: Partial<Omit<Product, 'id'>>): Promise<Product | null> => {
+// Função para atualizar produto (requer autenticação de admin)
+export const updateProduct = async (id: number, product: Partial<Omit<Product, 'id'>>, adminEmail: string): Promise<Product | null> => {
   try {
-    await setSecretKey()
-    
+    // Verificar se o admin está autenticado
+    if (!adminEmail) {
+      console.error('Email do admin não fornecido')
+      return null
+    }
+
+    // Atualizar produto diretamente
     const { data, error } = await supabase
       .from('products')
       .update(product)
@@ -104,11 +105,16 @@ export const updateProduct = async (id: number, product: Partial<Omit<Product, '
   }
 }
 
-// Função para deletar produto (requer chave secreta)
-export const deleteProduct = async (id: number): Promise<boolean> => {
+// Função para deletar produto (requer autenticação de admin)
+export const deleteProduct = async (id: number, adminEmail: string): Promise<boolean> => {
   try {
-    await setSecretKey()
-    
+    // Verificar se o admin está autenticado
+    if (!adminEmail) {
+      console.error('Email do admin não fornecido')
+      return false
+    }
+
+    // Deletar produto diretamente
     const { error } = await supabase
       .from('products')
       .delete()
@@ -126,7 +132,7 @@ export const deleteProduct = async (id: number): Promise<boolean> => {
   }
 }
 
-// Função para fazer upload de imagem (versão simplificada para desenvolvimento)
+// Função para fazer upload de imagem
 export const uploadImage = async (file: File, fileName: string): Promise<string | null> => {
   try {
     console.log('Iniciando upload de imagem:', fileName)
@@ -150,7 +156,7 @@ export const uploadImage = async (file: File, fileName: string): Promise<string 
       console.warn('Bucket não é público. Isso pode causar problemas de upload.')
     }
     
-    // Tentar upload direto primeiro (para desenvolvimento)
+    // Tentar upload
     const { error } = await supabase.storage
       .from(bucketName)
       .upload(fileName, file, {
@@ -159,31 +165,11 @@ export const uploadImage = async (file: File, fileName: string): Promise<string 
       })
 
     if (error) {
-      console.error('Erro no upload direto:', error)
-      
-              // Se falhar, tentar com chave secreta
-        try {
-          await setSecretKey()
-          const { error: retryError } = await supabase.storage
-            .from(bucketName)
-            .upload(fileName, file, {
-              cacheControl: '3600',
-              upsert: false
-            })
-        
-        if (retryError) {
-          console.error('Erro no upload com chave secreta:', retryError)
-          return null
-        }
-        
-        console.log('Upload bem-sucedido com chave secreta')
-      } catch (retryErr) {
-        console.error('Erro ao tentar upload com chave secreta:', retryErr)
-        return null
-      }
-    } else {
-      console.log('Upload bem-sucedido direto')
+      console.error('Erro no upload:', error)
+      return null
     }
+
+    console.log('Upload bem-sucedido')
 
     // Retorna a URL pública da imagem
     const { data: { publicUrl } } = supabase.storage
@@ -220,11 +206,17 @@ export const loadSiteSettings = async (): Promise<SiteSettings | null> => {
   }
 }
 
-// Função para salvar configurações no banco (requer chave secreta)
+// Função para salvar configurações no banco (requer autenticação de admin)
 export const saveSiteSettings = async (settings: Omit<SiteSettings, 'id' | 'created_at' | 'updated_at'>): Promise<SiteSettings | null> => {
   try {
-    await setSecretKey()
+    // Verificar se o usuário está autenticado
+    const { data: { user } } = await supabase.auth.getUser()
     
+    if (!user) {
+      console.error('Usuário não autenticado')
+      return null
+    }
+
     const { data, error } = await supabase
       .from('site_settings')
       .insert([settings])
@@ -243,11 +235,17 @@ export const saveSiteSettings = async (settings: Omit<SiteSettings, 'id' | 'crea
   }
 }
 
-// Função para atualizar configurações existentes (requer chave secreta)
+// Função para atualizar configurações existentes (requer autenticação de admin)
 export const updateSiteSettings = async (id: number, settings: Partial<Omit<SiteSettings, 'id' | 'created_at' | 'updated_at'>>): Promise<SiteSettings | null> => {
   try {
-    await setSecretKey()
+    // Verificar se o usuário está autenticado
+    const { data: { user } } = await supabase.auth.getUser()
     
+    if (!user) {
+      console.error('Usuário não autenticado')
+      return null
+    }
+
     const { data, error } = await supabase
       .from('site_settings')
       .update(settings)

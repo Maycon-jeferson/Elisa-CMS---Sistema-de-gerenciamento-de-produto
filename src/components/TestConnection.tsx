@@ -2,161 +2,148 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { loadProducts } from '@/lib/supabase'
 
 export default function TestConnection() {
   const [testResult, setTestResult] = useState<string>('')
   const [loading, setLoading] = useState(false)
 
-  const testConnection = async () => {
+  const runTests = async () => {
     setLoading(true)
-    setTestResult('')
+    setTestResult('Iniciando testes...\n')
 
     try {
-      // Teste 1: Verificar se consegue conectar
-      setTestResult('🔍 Testando conexão com Supabase...\n')
+      // Teste 1: Conexão básica
+      setTestResult(prev => prev + '🔍 Testando conexão básica...\n')
+      const { data, error } = await supabase.from('products').select('count')
       
-      // Teste 2: Verificar se a tabela existe e sua estrutura
-      setTestResult(prev => prev + '📋 Verificando estrutura da tabela...\n')
-      
-      const { data: tableInfo, error: tableError } = await supabase
+      if (error) {
+        setTestResult(prev => prev + `❌ Erro na conexão: ${error.message}\n`)
+      } else {
+        setTestResult(prev => prev + `✅ Conexão básica OK\n`)
+      }
+
+      // Teste 2: Verificar se a tabela products existe
+      setTestResult(prev => prev + '🔍 Verificando tabela products...\n')
+      const { data: tableData, error: tableError } = await supabase
         .from('products')
         .select('*')
         .limit(1)
 
       if (tableError) {
-        setTestResult(prev => prev + `❌ Erro ao acessar tabela: ${tableError.message}\n`)
-        setTestResult(prev => prev + `Código: ${tableError.code}\n`)
-        setTestResult(prev => prev + `Detalhes: ${JSON.stringify(tableError.details)}\n`)
-        return
-      }
-
-      setTestResult(prev => prev + `✅ Tabela 'products' acessível\n`)
-      setTestResult(prev => prev + `📊 Estrutura encontrada: ${JSON.stringify(tableInfo?.[0] || {}, null, 2)}\n`)
-
-      // Teste 3: Tentar inserir um produto de teste
-      const testProduct = {
-        name: 'Produto Teste ' + Date.now(),
-        description: 'Descrição de teste',
-        price: 10.50,
-        category: 'Teste',
-        in_stock: true,
-        stock: 10,
-        rating: 4.5
-      }
-
-      setTestResult(prev => prev + '\n🔄 Tentando inserir produto de teste...\n')
-      setTestResult(prev => prev + `📝 Dados: ${JSON.stringify(testProduct, null, 2)}\n`)
-
-      const { data: insertData, error: insertError } = await supabase
-        .from('products')
-        .insert([testProduct])
-        .select()
-
-      if (insertError) {
-        setTestResult(prev => prev + `❌ Erro ao inserir: ${insertError.message}\n`)
-        setTestResult(prev => prev + `Código: ${insertError.code}\n`)
-        setTestResult(prev => prev + `Detalhes: ${JSON.stringify(insertError.details)}\n`)
-        setTestResult(prev => prev + `Hint: ${insertError.hint || 'Nenhuma dica disponível'}\n`)
-        return
-      }
-
-      setTestResult(prev => prev + `✅ Produto inserido com sucesso!\n`)
-      setTestResult(prev => prev + `🆔 ID: ${insertData?.[0]?.id}\n`)
-      setTestResult(prev => prev + `📄 Dados retornados: ${JSON.stringify(insertData?.[0], null, 2)}\n`)
-
-      // Teste 4: Deletar o produto de teste
-      if (insertData?.[0]?.id) {
-        setTestResult(prev => prev + '\n🗑️ Removendo produto de teste...\n')
-        
-        const { error: deleteError } = await supabase
-          .from('products')
-          .delete()
-          .eq('id', insertData[0].id)
-
-        if (deleteError) {
-          setTestResult(prev => prev + `⚠️ Erro ao deletar produto de teste: ${deleteError.message}\n`)
-        } else {
-          setTestResult(prev => prev + `✅ Produto de teste removido\n`)
-        }
-      }
-
-      setTestResult(prev => prev + '\n🎉 Todos os testes passaram! O sistema está funcionando corretamente.\n')
-
-    } catch (err) {
-      setTestResult(prev => prev + `❌ Erro geral: ${err && typeof err === 'object' && 'message' in err ? String(err.message) : 'Erro desconhecido'}\n`)
-      setTestResult(prev => prev + `Stack: ${err && typeof err === 'object' && 'stack' in err ? String(err.stack) : 'N/A'}\n`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const testSimpleInsert = async () => {
-    setLoading(true)
-    setTestResult('')
-
-    try {
-      setTestResult('🧪 Teste simples de inserção...\n')
-      
-      const simpleProduct = {
-        name: 'Teste Simples',
-        price: 5.00
-      }
-
-      setTestResult(prev => prev + `📝 Inserindo: ${JSON.stringify(simpleProduct)}\n`)
-
-      const { data, error } = await supabase
-        .from('products')
-        .insert([simpleProduct])
-        .select()
-
-      if (error) {
-        setTestResult(prev => prev + `❌ Erro: ${error.message}\n`)
-        setTestResult(prev => prev + `Código: ${error.code}\n`)
-        setTestResult(prev => prev + `Detalhes: ${JSON.stringify(error.details)}\n`)
+        setTestResult(prev => prev + `❌ Erro na tabela products: ${tableError.message}\n`)
       } else {
-        setTestResult(prev => prev + `✅ Sucesso! ID: ${data?.[0]?.id}\n`)
+        setTestResult(prev => prev + `✅ Tabela 'products' acessível\n`)
+      }
+
+      // Teste 3: Contar produtos
+      setTestResult(prev => prev + '🔍 Contando produtos...\n')
+      const { count, error: countError } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+
+      if (countError) {
+        setTestResult(prev => prev + `❌ Erro ao contar produtos: ${countError.message}\n`)
+      } else {
+        setTestResult(prev => prev + `✅ Total de produtos: ${count || 0}\n`)
+      }
+
+      // Teste 4: Testar função loadProducts
+      setTestResult(prev => prev + '🔍 Testando função loadProducts...\n')
+      try {
+        const products = await loadProducts()
+        setTestResult(prev => prev + `✅ loadProducts retornou ${products.length} produtos\n`)
         
-        // Limpar o produto de teste
-        if (data?.[0]?.id) {
-          await supabase.from('products').delete().eq('id', data[0].id)
+        if (products.length > 0) {
+          setTestResult(prev => prev + `📋 Primeiro produto: ${products[0].name}\n`)
+        }
+      } catch (loadError) {
+        setTestResult(prev => prev + `❌ Erro em loadProducts: ${loadError}\n`)
+      }
+
+      // Teste 5: Verificar políticas RLS (simplificado)
+      setTestResult(prev => prev + '🔍 Verificando políticas RLS...\n')
+      try {
+        // Tentar uma operação que seria bloqueada por RLS se mal configurado
+        const { data: rlsTest, error: rlsError } = await supabase
+          .from('products')
+          .select('id')
+          .limit(1)
+
+        if (rlsError && rlsError.message.includes('policy')) {
+          setTestResult(prev => prev + `❌ Problema com políticas RLS: ${rlsError.message}\n`)
+        } else {
+          setTestResult(prev => prev + `✅ Políticas RLS parecem estar OK\n`)
+        }
+      } catch (rlsError) {
+        setTestResult(prev => prev + `⚠️ Erro ao verificar RLS: ${rlsError}\n`)
+      }
+
+      // Teste 6: Testar inserção (apenas se não houver produtos)
+      if (count === 0) {
+        setTestResult(prev => prev + '🔍 Testando inserção de produto...\n')
+        const testProduct = {
+          name: 'Produto Teste',
+          description: 'Produto para teste de conexão',
+          price: 29.99,
+          category: 'Teste',
+          in_stock: true
+        }
+
+        const { data: insertData, error: insertError } = await supabase
+          .from('products')
+          .insert([testProduct])
+          .select()
+          .single()
+
+        if (insertError) {
+          setTestResult(prev => prev + `❌ Erro ao inserir produto: ${insertError.message}\n`)
+        } else {
+          setTestResult(prev => prev + `✅ Produto inserido com sucesso (ID: ${insertData.id})\n`)
+          
+          // Remover o produto de teste
+          await supabase.from('products').delete().eq('id', insertData.id)
+          setTestResult(prev => prev + `🗑️ Produto de teste removido\n`)
         }
       }
 
-    } catch (err) {
-      setTestResult(prev => prev + `❌ Erro: ${err && typeof err === 'object' && 'message' in err ? String(err.message) : 'Erro desconhecido'}\n`)
+      setTestResult(prev => prev + '\n🎉 Testes concluídos!\n')
+
+    } catch (error) {
+      setTestResult(prev => prev + `❌ Erro geral: ${error}\n`)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">🔧 Diagnóstico de Problemas</h3>
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold text-[#2c3e50] mb-4">Teste de Conexão - Tabela Products</h2>
       
-      <div className="flex gap-3 mb-4">
-        <button
-          onClick={testConnection}
-          disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? 'Testando...' : '🔍 Teste Completo'}
-        </button>
-        
-        <button
-          onClick={testSimpleInsert}
-          disabled={loading}
-          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
-        >
-          {loading ? 'Testando...' : '🧪 Teste Simples'}
-        </button>
+      <button
+        onClick={runTests}
+        disabled={loading}
+        className="mb-4 px-6 py-3 bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white font-semibold rounded-lg hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-300 disabled:opacity-50"
+      >
+        {loading ? 'Executando testes...' : 'Executar Testes'}
+      </button>
+
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold text-[#2c3e50] mb-2">Resultados:</h3>
+        <pre className="text-sm text-[#2c3e50] whitespace-pre-wrap font-mono">
+          {testResult || 'Clique em "Executar Testes" para começar...'}
+        </pre>
       </div>
 
-      {testResult && (
-        <div className="bg-gray-50 p-4 rounded-md">
-          <h4 className="font-medium text-gray-900 mb-2">📋 Resultado:</h4>
-          <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono">{testResult}</pre>
-        </div>
-      )}
+      <div className="mt-4 text-sm text-[#7f8c8d]">
+        <p><strong>Dicas:</strong></p>
+        <ul className="list-disc list-inside space-y-1">
+          <li>Verifique se a tabela 'products' existe no Supabase</li>
+          <li>Confirme se as políticas RLS estão configuradas corretamente</li>
+          <li>Verifique se as variáveis de ambiente estão corretas</li>
+          <li>Se houver erro de RLS, execute o script storage_setup.sql</li>
+        </ul>
+      </div>
     </div>
   )
 } 

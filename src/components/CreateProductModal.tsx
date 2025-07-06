@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createProduct, uploadImage } from '@/lib/supabase'
 import imageCompression from 'browser-image-compression'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface CreateProductModalProps {
   isOpen: boolean
@@ -11,6 +12,7 @@ interface CreateProductModalProps {
 }
 
 export default function CreateProductModal({ isOpen, onClose, onProductCreated }: CreateProductModalProps) {
+  const { currentAdmin } = useAuth()
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -72,6 +74,10 @@ export default function CreateProductModal({ isOpen, onClose, onProductCreated }
         imageUrl = formData.image.trim()
       }
       
+      if (!currentAdmin?.email) {
+        throw new Error('Admin não autenticado')
+      }
+
       const newProduct = await createProduct({
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
@@ -79,7 +85,7 @@ export default function CreateProductModal({ isOpen, onClose, onProductCreated }
         category: formData.category.trim(),
         image: imageUrl || undefined,
         in_stock: formData.in_stock
-      })
+      }, currentAdmin.email)
 
       if (!newProduct) {
         throw new Error('Erro ao criar produto')
