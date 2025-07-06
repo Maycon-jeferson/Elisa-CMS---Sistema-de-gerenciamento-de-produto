@@ -2,12 +2,15 @@
 
 import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles, Leaf, Heart } from 'lucide-react'
+import { useSiteSettings } from '@/hooks/useSiteSettings'
 
 interface HeroSectionProps {
   productCount?: number
 }
 
 export default function HeroSection({ productCount = 0 }: HeroSectionProps) {
+  const { settings, loading } = useSiteSettings()
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -77,9 +80,13 @@ export default function HeroSection({ productCount = 0 }: HeroSectionProps) {
             className="text-5xl md:text-7xl font-bold mb-6"
             variants={itemVariants}
           >
-            <span className="gradient-text">Eliza CMS</span>
+            <span className="gradient-text">
+              {loading ? 'Eliza CMS' : settings?.site_name || 'Eliza CMS'}
+            </span>
             <br />
-            <span className="text-[#2c3e50]">Catálogo de Produtos</span>
+            <span className="text-[#2c3e50]">
+              {loading ? 'Catálogo de Produtos' : settings?.title || 'Catálogo de Produtos'}
+            </span>
           </motion.h1>
 
           {/* Subtitle */}
@@ -87,8 +94,18 @@ export default function HeroSection({ productCount = 0 }: HeroSectionProps) {
             className="text-xl md:text-2xl text-[#7f8c8d] mb-8 max-w-3xl mx-auto leading-relaxed"
             variants={itemVariants}
           >
-            slogan aqui
+            {loading ? 'Carregando...' : settings?.subtitle || 'Descubra produtos naturais de qualidade'}
           </motion.p>
+
+          {/* Slogan */}
+          {settings?.slogan && (
+            <motion.p
+              className="text-lg text-[#8b4513] font-medium mb-8 italic"
+              variants={itemVariants}
+            >
+              "{settings.slogan}"
+            </motion.p>
+          )}
 
           {/* Stats */}
           <motion.div

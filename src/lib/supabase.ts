@@ -17,4 +17,81 @@ export interface Product {
   rating?: number
   stock?: number
   created_at: string
+}
+
+// Tipo para as configurações do site
+export interface SiteSettings {
+  id: number
+  whatsapp_number: string
+  site_name: string
+  title: string
+  subtitle: string
+  slogan: string
+  created_at: string
+  updated_at: string
+}
+
+// Função para carregar configurações do banco
+export const loadSiteSettings = async (): Promise<SiteSettings | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (error) {
+      console.error('Erro ao carregar configurações:', error)
+      return null
+    }
+
+    return data
+  } catch (err) {
+    console.error('Erro ao carregar configurações:', err)
+    return null
+  }
+}
+
+// Função para salvar configurações no banco
+export const saveSiteSettings = async (settings: Omit<SiteSettings, 'id' | 'created_at' | 'updated_at'>): Promise<SiteSettings | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('site_settings')
+      .insert([settings])
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Erro ao salvar configurações:', error)
+      return null
+    }
+
+    return data
+  } catch (err) {
+    console.error('Erro ao salvar configurações:', err)
+    return null
+  }
+}
+
+// Função para atualizar configurações existentes
+export const updateSiteSettings = async (id: number, settings: Partial<Omit<SiteSettings, 'id' | 'created_at' | 'updated_at'>>): Promise<SiteSettings | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('site_settings')
+      .update(settings)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Erro ao atualizar configurações:', error)
+      return null
+    }
+
+    return data
+  } catch (err) {
+    console.error('Erro ao atualizar configurações:', err)
+    return null
+  }
 } 

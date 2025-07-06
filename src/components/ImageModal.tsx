@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { MessageCircle, Package, Star, Calendar, X } from 'lucide-react'
 import { Product } from '@/lib/supabase'
+import { useSiteSettings } from '@/hooks/useSiteSettings'
 
 interface ImageModalProps {
   isOpen: boolean
@@ -12,6 +13,8 @@ interface ImageModalProps {
 }
 
 export default function ImageModal({ isOpen, onClose, product }: ImageModalProps) {
+  const { settings } = useSiteSettings()
+
   if (!isOpen || !product) return null
 
   const formatPrice = (price: number) => {
@@ -26,7 +29,7 @@ export default function ImageModal({ isOpen, onClose, product }: ImageModalProps
   }
 
   const handleWhatsAppClick = () => {
-    const phoneNumber = '5511999999999' // Mesmo número do Header
+    const phoneNumber = settings?.whatsapp_number || '5511999999999'
     const message = `Olá! 😊\nTenho interesse no produto ${product.name}, que está no valor de ${formatPrice(product.price)}.\nPoderia me passar mais informações?`
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
     window.open(whatsappUrl, '_blank')

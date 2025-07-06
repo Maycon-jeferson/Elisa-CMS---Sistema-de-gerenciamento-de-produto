@@ -4,9 +4,11 @@ import { motion } from 'framer-motion'
 import { Flower, MessageCircle, User, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import AdminLoginModal from './AdminLoginModal'
+import { useSiteSettings } from '@/hooks/useSiteSettings'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { settings, loading } = useSiteSettings()
 
   const menuVariants = {
     closed: {
@@ -33,7 +35,7 @@ export default function Header() {
   }
 
   const handleWhatsAppClick = () => {
-    const phoneNumber = '5511999999999' // Substitua pelo número desejado
+    const phoneNumber = settings?.whatsapp_number || '5511999999999'
     const message = 'Olá! Gostaria de saber mais sobre os produtos.'
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
     window.open(whatsappUrl, '_blank')
@@ -57,7 +59,9 @@ export default function Header() {
             <div className="w-8 h-8 bg-gradient-to-br from-[#8b4513] to-[#d2691e] rounded-full flex items-center justify-center">
               <Flower className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold gradient-text">Eliza CMS</span>
+            <span className="text-xl font-bold gradient-text">
+              {loading ? 'Eliza CMS' : settings?.site_name || 'Eliza CMS'}
+            </span>
           </motion.div>
 
           {/* Desktop Actions */}
