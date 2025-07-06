@@ -39,7 +39,7 @@ Um sistema moderno e elegante para gerenciamento de produtos naturais, inspirado
 
 ## 📦 Instalação
 
-```bash
+```bashas
 # Clone o repositório
 git clone git@github.com:Maycon-jeferson/elizacms.git
 
