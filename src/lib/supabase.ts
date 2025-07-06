@@ -126,31 +126,74 @@ export const deleteProduct = async (id: number): Promise<boolean> => {
   }
 }
 
-// Função para fazer upload de imagem (requer chave secreta)
+// Função para fazer upload de imagem (versão simplificada para desenvolvimento)
 export const uploadImage = async (file: File, fileName: string): Promise<string | null> => {
   try {
-    await setSecretKey()
+    console.log('Iniciando upload de imagem:', fileName)
     
+    // Primeiro, verificar quais buckets existem
+    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets()
+    if (bucketsError) {
+      console.error('Erro ao listar buckets:', bucketsError)
+      return null
+    }
+    
+    console.log('Buckets disponíveis:', buckets.map(b => b.name))
+    
+    // Tentar encontrar o bucket correto
+    const bucketName = buckets.find(b => b.name === 'produtos')?.name || 'produtos'
+    console.log('Usando bucket:', bucketName)
+    
+    // Verificar se o bucket é público
+    const bucket = buckets.find(b => b.name === bucketName)
+    if (bucket && !bucket.public) {
+      console.warn('Bucket não é público. Isso pode causar problemas de upload.')
+    }
+    
+    // Tentar upload direto primeiro (para desenvolvimento)
     const { data, error } = await supabase.storage
-      .from('produtos')
+      .from(bucketName)
       .upload(fileName, file, {
         cacheControl: '3600',
         upsert: false
       })
 
     if (error) {
-      console.error('Erro ao fazer upload da imagem:', error)
-      return null
+      console.error('Erro no upload direto:', error)
+      
+              // Se falhar, tentar com chave secreta
+        try {
+          await setSecretKey()
+          const { data: retryData, error: retryError } = await supabase.storage
+            .from(bucketName)
+            .upload(fileName, file, {
+              cacheControl: '3600',
+              upsert: false
+            })
+        
+        if (retryError) {
+          console.error('Erro no upload com chave secreta:', retryError)
+          return null
+        }
+        
+        console.log('Upload bem-sucedido com chave secreta')
+      } catch (retryErr) {
+        console.error('Erro ao tentar upload com chave secreta:', retryErr)
+        return null
+      }
+    } else {
+      console.log('Upload bem-sucedido direto')
     }
 
     // Retorna a URL pública da imagem
     const { data: { publicUrl } } = supabase.storage
-      .from('produtos')
+      .from(bucketName)
       .getPublicUrl(fileName)
 
+    console.log('URL pública gerada:', publicUrl)
     return publicUrl
   } catch (err) {
-    console.error('Erro ao fazer upload da imagem:', err)
+    console.error('Erro geral ao fazer upload da imagem:', err)
     return null
   }
 }

@@ -16,6 +16,12 @@
 
 ### 2. Executar Script SQL de Segurança
 
+#### Para Desenvolvimento:
+1. Vá para **SQL Editor** no menu lateral
+2. Execute o script `storage_setup_dev.sql` que está na raiz do projeto
+3. Este script configura políticas mais permissivas para desenvolvimento
+
+#### Para Produção:
 1. Vá para **SQL Editor** no menu lateral
 2. Execute o script `storage_setup.sql` que está na raiz do projeto
 3. Este script configura:
