@@ -17,17 +17,17 @@ export default function AdminPage() {
     }
   }, [router])
 
-  // Se estiver em produção, não renderiza nada
-  if (process.env.NODE_ENV === 'production') {
-    return null
-  }
-
   // Verificar autenticação
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/')
     }
   }, [isAuthenticated, router])
+
+  // Se estiver em produção, não renderiza nada
+  if (process.env.NODE_ENV === 'production') {
+    return null
+  }
 
   if (!isAuthenticated) {
     return (

@@ -5,11 +5,6 @@ import { AuthService, Admin } from '@/lib/auth'
 import { User, Plus, Trash2, Eye, EyeOff } from 'lucide-react'
 
 export default function AdminManager() {
-  // Verificar se está em desenvolvimento
-  if (process.env.NODE_ENV === 'production') {
-    return null
-  }
-
   const [admins, setAdmins] = useState<Admin[]>([])
   const [loading, setLoading] = useState(false)
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -24,6 +19,11 @@ export default function AdminManager() {
   useEffect(() => {
     loadAdmins()
   }, [])
+
+  // Verificar se está em desenvolvimento
+  if (process.env.NODE_ENV === 'production') {
+    return null
+  }
 
   const loadAdmins = async () => {
     setLoading(true)

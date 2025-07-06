@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Eliza CMS",
+  title: "Elisa Cosméticos",
   description: "Sistema de gerenciamento de produtos",
 };
 
@@ -30,8 +30,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ClientAuthProvider>
-        {children}
-        <Footer />
+          {children}
+          <Footer />
         </ClientAuthProvider>
       </body>
     </html>

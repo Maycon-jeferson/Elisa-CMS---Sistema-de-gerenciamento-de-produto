@@ -209,12 +209,22 @@ export const loadSiteSettings = async (): Promise<SiteSettings | null> => {
 // Função para salvar configurações no banco (requer autenticação de admin)
 export const saveSiteSettings = async (settings: Omit<SiteSettings, 'id' | 'created_at' | 'updated_at'>): Promise<SiteSettings | null> => {
   try {
-    // Verificar se o usuário está autenticado
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (!user) {
-      console.error('Usuário não autenticado')
-      return null
+    // Verificar se o usuário está autenticado usando o sistema customizado
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('admin_token')
+      if (!token) {
+        console.error('Usuário não autenticado')
+        return null
+      }
+      
+      // Verificar se o token é válido
+      const { AuthService } = await import('./auth')
+      const admin = AuthService.verifyToken(token)
+      if (!admin) {
+        console.error('Token inválido ou expirado')
+        localStorage.removeItem('admin_token')
+        return null
+      }
     }
 
     const { data, error } = await supabase
@@ -238,12 +248,22 @@ export const saveSiteSettings = async (settings: Omit<SiteSettings, 'id' | 'crea
 // Função para atualizar configurações existentes (requer autenticação de admin)
 export const updateSiteSettings = async (id: number, settings: Partial<Omit<SiteSettings, 'id' | 'created_at' | 'updated_at'>>): Promise<SiteSettings | null> => {
   try {
-    // Verificar se o usuário está autenticado
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (!user) {
-      console.error('Usuário não autenticado')
-      return null
+    // Verificar se o usuário está autenticado usando o sistema customizado
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('admin_token')
+      if (!token) {
+        console.error('Usuário não autenticado')
+        return null
+      }
+      
+      // Verificar se o token é válido
+      const { AuthService } = await import('./auth')
+      const admin = AuthService.verifyToken(token)
+      if (!admin) {
+        console.error('Token inválido ou expirado')
+        localStorage.removeItem('admin_token')
+        return null
+      }
     }
 
     const { data, error } = await supabase

@@ -50,11 +50,14 @@ export default function AdminLoginForm({ onLogin, onSuccess }: AdminLoginFormPro
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-sm mx-auto bg-white p-8 rounded-lg shadow-md space-y-6">
+    <form onSubmit={handleSubmit} className="max-w-sm mx-auto bg-white p-8 rounded-2xl shadow-xl space-y-6">
       <h2 className="text-2xl font-bold text-center text-[#2c3e50]">Login do Administrador</h2>
       {error && (
-        <div className="bg-red-50 border border-red-200 text-[#e74c3c] rounded p-3 text-sm text-center">
-          {error}
+        <div className="bg-red-50 border border-red-200 text-[#e74c3c] rounded-lg p-4 text-sm text-center shadow-sm">
+          <div className="flex items-center justify-center">
+            <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+            {error}
+          </div>
         </div>
       )}
       <div>
@@ -63,9 +66,10 @@ export default function AdminLoginForm({ onLogin, onSuccess }: AdminLoginFormPro
           id="email"
           type="email"
           autoComplete="username"
-          className="w-full px-3 py-2 border border-[#e8e8e8] rounded-md shadow-sm focus:outline-none focus:ring-[#8b4513] focus:border-[#8b4513] text-[#2c3e50] placeholder:text-[#7f8c8d]"
+          className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#8b4513] focus:border-[#8b4513] text-[#2c3e50] placeholder:text-[#7f8c8d] transition-all duration-200"
           value={email}
           onChange={e => setEmail(e.target.value)}
+          placeholder="admin@elizacms.com"
           required
         />
       </div>
@@ -75,25 +79,27 @@ export default function AdminLoginForm({ onLogin, onSuccess }: AdminLoginFormPro
           id="password"
           type="password"
           autoComplete="current-password"
-          className="w-full px-3 py-2 border border-[#e8e8e8] rounded-md shadow-sm focus:outline-none focus:ring-[#8b4513] focus:border-[#8b4513] text-[#2c3e50] placeholder:text-[#7f8c8d]"
+          className="w-full px-4 py-3 border border-[#e8e8e8] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#8b4513] focus:border-[#8b4513] text-[#2c3e50] placeholder:text-[#7f8c8d] transition-all duration-200"
           value={password}
           onChange={e => setPassword(e.target.value)}
+          placeholder="••••••••"
           required
         />
       </div>
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-2 px-4 bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white font-semibold rounded-full shadow-natura hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-300 disabled:opacity-50"
+        className="w-full py-3 px-6 bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white font-semibold rounded-full shadow-natura hover:from-[#a0522d] hover:to-[#8b4513] hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#8b4513] focus:ring-offset-2"
       >
-        {loading ? "Entrando..." : "Entrar"}
+        {loading ? (
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            Entrando...
+          </div>
+        ) : (
+          "Entrar"
+        )}
       </button>
-      
-      <div className="text-xs text-center text-[#7f8c8d] mt-4">
-        <p>Credenciais padrão:</p>
-        <p>E-mail: admin@elizacms.com</p>
-        <p>Senha: admin123</p>
-      </div>
     </form>
   )
 } 

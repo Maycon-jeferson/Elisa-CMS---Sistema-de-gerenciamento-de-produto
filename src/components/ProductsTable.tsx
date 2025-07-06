@@ -91,9 +91,10 @@ export default function ProductsTable() {
       } else {
         alert('Erro ao deletar produto')
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Erro ao deletar produto:', err)
-      alert('Erro ao deletar produto: ' + (err?.message || err))
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      alert('Erro ao deletar produto: ' + errorMessage)
     }
   }
 

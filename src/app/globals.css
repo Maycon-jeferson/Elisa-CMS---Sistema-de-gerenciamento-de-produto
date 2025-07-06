@@ -130,6 +130,26 @@ body {
   box-shadow: 0 10px 25px rgba(139, 69, 19, 0.1);
 }
 
+/* Melhorias para botões */
+button:focus {
+  outline: none;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Melhorias para inputs */
+input:focus {
+  outline: none;
+}
+
+input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .hover-lift {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }

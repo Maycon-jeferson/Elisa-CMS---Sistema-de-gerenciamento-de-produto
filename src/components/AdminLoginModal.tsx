@@ -2,16 +2,25 @@
 
 import { useState, useEffect } from "react"
 import AdminLoginForm from "./AdminLoginForm"
-import { useAuth } from "@/contexts/AuthContext"
+// import { useAuth } from "@/contexts/AuthContext"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Settings, Save, Loader2, User, LogOut, Shield } from "lucide-react"
+import { X, Settings, Save, Loader2 } from "lucide-react"
 import { loadSiteSettings, saveSiteSettings, updateSiteSettings, SiteSettings } from "@/lib/supabase"
-import Link from "next/link"
 
-export default function AdminLoginModal() {
-  const { isAuthenticated, currentAdmin, logout } = useAuth()
-  const [open, setOpen] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
+interface AdminLoginModalProps {
+  isLoginOpen?: boolean
+  isSettingsOpen?: boolean
+  onLoginClose?: () => void
+  onSettingsClose?: () => void
+}
+
+export default function AdminLoginModal({ 
+  isLoginOpen = false, 
+  isSettingsOpen = false,
+  onLoginClose,
+  onSettingsClose 
+}: AdminLoginModalProps) {
+
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [currentSettings, setCurrentSettings] = useState<SiteSettings | null>(null)
@@ -25,10 +34,10 @@ export default function AdminLoginModal() {
 
   // Carregar configurações ao abrir o modal
   useEffect(() => {
-    if (settingsOpen) {
+    if (isSettingsOpen) {
       loadSettings()
     }
-  }, [settingsOpen])
+  }, [isSettingsOpen])
 
   const loadSettings = async () => {
     setLoading(true)
@@ -71,8 +80,23 @@ export default function AdminLoginModal() {
 
       if (result) {
         setCurrentSettings(result)
+        
+        // Atualizar localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('siteSettings', JSON.stringify({
+            whatsappNumber: result.whatsapp_number,
+            siteName: result.site_name,
+            title: result.title,
+            subtitle: result.subtitle,
+            slogan: result.slogan
+          }))
+        }
+        
+        // Recarregar a página para atualizar as configurações em todos os componentes
+        window.location.reload()
+        
         alert('Configurações salvas com sucesso!')
-        setSettingsOpen(false)
+        onSettingsClose?.()
       } else {
         alert('Erro ao salvar configurações.')
       }
@@ -84,61 +108,13 @@ export default function AdminLoginModal() {
     }
   }
 
-  const handleLogout = () => {
-    logout()
-    setOpen(false)
-    setSettingsOpen(false)
-  }
+
 
   return (
     <>
-      {/* Botão de Admin */}
-      {!isAuthenticated ? (
-        <button
-          onClick={() => setOpen(true)}
-          className="fixed bottom-4 right-4 bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white p-3 rounded-full shadow-lg hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#8b4513] focus:ring-offset-2"
-          aria-label="Login do Administrador"
-        >
-          <User className="h-6 w-6" />
-        </button>
-      ) : (
-        <div className="fixed bottom-4 right-4 flex flex-col gap-2">
-          {/* Botão de Configurações */}
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white p-3 rounded-full shadow-lg hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#8b4513] focus:ring-offset-2"
-            aria-label="Configurações"
-          >
-            <Settings className="h-6 w-6" />
-          </button>
-          
-          {/* Botão de Administração (apenas em desenvolvimento) */}
-          {process.env.NODE_ENV === 'development' && (
-            <Link
-              href="/admin"
-              className="bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              aria-label="Painel de Administração"
-              title="Painel de Administração (DEV)"
-            >
-              <Shield className="h-6 w-6" />
-            </Link>
-          )}
-          
-          {/* Botão de Logout */}
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 text-white p-3 rounded-full shadow-lg hover:bg-red-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-            aria-label="Sair"
-            title={`Sair (${currentAdmin?.name})`}
-          >
-            <LogOut className="h-6 w-6" />
-          </button>
-        </div>
-      )}
-
       {/* Modal de Login */}
       <AnimatePresence>
-        {open && (
+        {isLoginOpen && (
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center m-2 sm:m-4"
             initial={{ opacity: 0 }}
@@ -153,14 +129,14 @@ export default function AdminLoginModal() {
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
               <button
-                onClick={() => setOpen(false)}
+                onClick={onLoginClose}
                 className="absolute -top-4 -right-4 bg-white rounded-full shadow p-2 text-[#8b4513] hover:bg-[#f4f1eb] hover:text-[#d2691e] transition-colors focus:outline-none border border-[#e8e8e8]"
                 aria-label="Fechar"
               >
                 <X className="h-6 w-6" />
               </button>
               <div className="bg-white rounded-2xl shadow-2xl border border-[#e8e8e8] p-0 overflow-hidden animate-fadeIn h-auto max-h-[90vh] overflow-y-auto">
-                <AdminLoginForm onSuccess={() => setOpen(false)} />
+                <AdminLoginForm onSuccess={onLoginClose} />
               </div>
             </motion.div>
           </motion.div>
@@ -169,7 +145,7 @@ export default function AdminLoginModal() {
 
       {/* Modal de Configurações */}
       <AnimatePresence>
-        {settingsOpen && (
+        {isSettingsOpen && (
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center m-2 sm:m-4"
             initial={{ opacity: 0 }}
@@ -184,7 +160,7 @@ export default function AdminLoginModal() {
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
               <button
-                onClick={() => setSettingsOpen(false)}
+                onClick={onSettingsClose}
                 className="absolute -top-4 -right-4 bg-white rounded-full shadow p-2 text-[#8b4513] hover:bg-[#f4f1eb] hover:text-[#d2691e] transition-colors focus:outline-none border border-[#e8e8e8]"
                 aria-label="Fechar"
               >

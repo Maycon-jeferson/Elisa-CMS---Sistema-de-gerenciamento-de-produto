@@ -11,15 +11,7 @@ export interface Admin {
   last_login?: string
 }
 
-// Interface para o payload do JWT
-interface JWTPayload {
-  id: number
-  email: string
-  name: string
-  role: string
-  iat: number
-  exp: number
-}
+
 
 export class AuthService {
   // Verificar credenciais no banco de dados
@@ -162,6 +154,53 @@ export class AuthService {
     } catch (error) {
       console.error('Erro ao listar admins:', error)
       return []
+    }
+  }
+
+  // Alterar senha do admin
+  static async changePassword(adminId: number, currentPassword: string, newPassword: string): Promise<boolean> {
+    try {
+      // Primeiro, buscar o admin atual para verificar a senha atual
+      const { data: admins, error: fetchError } = await supabase
+        .from('admins')
+        .select('password_hash')
+        .eq('id', adminId)
+        .eq('is_active', true)
+        .limit(1)
+
+      if (fetchError || !admins || admins.length === 0) {
+        console.error('Erro ao buscar admin:', fetchError)
+        return false
+      }
+
+      const admin = admins[0]
+      
+      // Verificar se a senha atual está correta
+      const isCurrentPasswordValid = await bcrypt.compare(currentPassword, admin.password_hash)
+      
+      if (!isCurrentPasswordValid) {
+        console.error('Senha atual incorreta')
+        return false
+      }
+
+      // Gerar hash da nova senha
+      const newPasswordHash = await bcrypt.hash(newPassword, 12)
+      
+      // Atualizar a senha no banco
+      const { error: updateError } = await supabase
+        .from('admins')
+        .update({ password_hash: newPasswordHash })
+        .eq('id', adminId)
+
+      if (updateError) {
+        console.error('Erro ao atualizar senha:', updateError)
+        return false
+      }
+
+      return true
+    } catch (error) {
+      console.error('Erro ao alterar senha:', error)
+      return false
     }
   }
 }
