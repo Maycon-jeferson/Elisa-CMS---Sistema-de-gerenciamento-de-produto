@@ -100,8 +100,8 @@ export default function EditProductModal({ isOpen, onClose, onProductUpdated, pr
   if (!isOpen || !product) return null
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl border border-[#e8e8e8] max-w-md w-full max-h-[90vh] overflow-y-auto relative animate-fadeIn">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl border border-[#e8e8e8] w-[80vw] sm:w-full sm:max-w-md max-h-[90vh] overflow-y-auto relative animate-fadeIn">
         <div className="px-6 py-4 border-b border-[#e8e8e8] flex items-center justify-between">
           <h2 className="text-xl font-bold text-[#2c3e50]">Editar Produto</h2>
           <button

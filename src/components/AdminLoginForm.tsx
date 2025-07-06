@@ -52,15 +52,6 @@ export default function AdminLoginForm({ onLogin, onSuccess }: AdminLoginFormPro
   return (
     <form onSubmit={handleSubmit} className="max-w-sm mx-auto bg-white p-8 rounded-lg shadow-md space-y-6">
       <h2 className="text-2xl font-bold text-center text-[#2c3e50]">Login do Administrador</h2>
-      
-      {/* Credenciais de teste */}
-      <div className="bg-[#f4f1eb] border border-[#e8e8e8] rounded-md p-3">
-        <h3 className="text-sm font-medium text-[#8b4513] mb-2">Credenciais de Administrador:</h3>
-        <div className="text-xs text-[#7f8c8d] space-y-1">
-          <p><strong className="text-[#8b4513]">Email:</strong> admin@elizacms.com</p>
-          <p><strong className="text-[#8b4513]">Senha:</strong> ElizaCMS2024!@#</p>
-        </div>
-      </div>
       {error && (
         <div className="bg-red-50 border border-red-200 text-[#e74c3c] rounded p-3 text-sm text-center">
           {error}

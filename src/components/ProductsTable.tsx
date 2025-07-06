@@ -273,8 +273,7 @@ export default function ProductsTable() {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Visualizar
+                        <Eye className="h-4 w-4" />
                       </motion.button>
                       <motion.button
                         onClick={() => handleEditProduct(product)}
@@ -282,8 +281,7 @@ export default function ProductsTable() {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
+                        <Edit className="h-4 w-4" />
                       </motion.button>
                       <motion.button
                         onClick={() => handleDeleteProduct(product.id)}
@@ -291,8 +289,7 @@ export default function ProductsTable() {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Excluir
+                        <Trash2 className="h-4 w-4" />
                       </motion.button>
                     </div>
                   )}

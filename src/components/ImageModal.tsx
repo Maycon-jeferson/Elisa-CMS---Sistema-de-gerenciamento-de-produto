@@ -32,9 +32,9 @@ export default function ImageModal({ isOpen, onClose, product }: ImageModalProps
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 m-2 sm:m-4">
+    <div className="fixed inset-0 flex items-center justify-center z-50 m-2 sm:m-4">
       <motion.div 
-        className="relative w-full max-w-full sm:max-w-2xl max-h-full"
+        className="relative w-[80vw] sm:w-full sm:max-w-2xl max-h-full"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}

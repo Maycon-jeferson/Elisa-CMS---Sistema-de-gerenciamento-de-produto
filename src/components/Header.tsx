@@ -48,59 +48,59 @@ export default function Header() {
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+      <div className="max-w-7xl mx-auto px-1 sm:px-4 lg:px-8">
+        <div className="flex justify-between items-center h-10">
           {/* Logo */}
           <motion.div 
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-1"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-[#8b4513] to-[#d2691e] rounded-full flex items-center justify-center">
-              <Flower className="w-5 h-5 text-white" />
+            <div className="w-6 h-6 bg-gradient-to-br from-[#8b4513] to-[#d2691e] rounded-full flex items-center justify-center">
+              <Flower className="w-3 h-3 text-white" />
             </div>
-            <span className="text-xl font-bold gradient-text">
+            <span className="text-base font-bold gradient-text leading-none">
               {loading ? 'Eliza CMS' : settings?.site_name || 'Eliza CMS'}
             </span>
           </motion.div>
 
           {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-2 h-full">
             <motion.button
               onClick={handleWhatsAppClick}
-              className="p-2 text-[#25D366] hover:text-[#128C7E] transition-colors duration-200"
+              className="p-0 w-8 h-8 flex items-center justify-center text-[#25D366] hover:text-[#128C7E] transition-colors duration-200"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               title="Fale conosco no WhatsApp"
             >
-              <MessageCircle className="w-5 h-5" />
+              <MessageCircle className="w-4 h-4" />
             </motion.button>
-            <div className="p-2">
+            <div className="flex items-center h-full">
               <AdminLoginModal />
             </div>
           </div>
 
           {/* Mobile Menu Button */}
           <motion.button
-            className="md:hidden p-2 text-[#2c3e50]"
+            className="md:hidden p-0 w-8 h-8 flex items-center justify-center text-[#2c3e50]"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             whileTap={{ scale: 0.95 }}
           >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </motion.button>
         </div>
       </div>
 
       {/* Mobile Menu */}
       <motion.div
-        className="md:hidden"
+        className={`md:hidden ${!isMenuOpen ? 'hidden' : ''}`}
         variants={menuVariants}
         initial="closed"
         animate={isMenuOpen ? "open" : "closed"}
       >
         <div className="bg-white border-t border-[#e8e8e8] shadow-lg">
-          <div className="px-4 py-6 space-y-4">
-            <div className="pt-4 border-t border-[#e8e8e8]">
+          <div className="px-4 py-4 space-y-2">
+            <div className="pt-2 border-t border-[#e8e8e8]">
               <motion.button
                 onClick={handleWhatsAppClick}
                 className="flex items-center space-x-2 text-[#25D366] hover:text-[#128C7E] transition-colors duration-200 font-medium py-2"
@@ -109,7 +109,7 @@ export default function Header() {
                 <MessageCircle className="w-5 h-5" />
                 <span>WhatsApp</span>
               </motion.button>
-              <div className="py-2">
+              <div className="py-1 flex items-center justify-start">
                 <AdminLoginModal />
               </div>
             </div>

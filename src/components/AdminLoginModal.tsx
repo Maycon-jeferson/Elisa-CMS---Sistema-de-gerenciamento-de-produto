@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import AdminLoginForm from "./AdminLoginForm"
 import { useAuth } from "@/contexts/AuthContext"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Settings, Save, Loader2 } from "lucide-react"
+import { X, Settings, Save, Loader2, User } from "lucide-react"
 import { loadSiteSettings, saveSiteSettings, updateSiteSettings, SiteSettings } from "@/lib/supabase"
 
 export default function AdminLoginModal() {
@@ -95,12 +95,12 @@ export default function AdminLoginModal() {
         <div className="flex items-center space-x-2">
           <motion.button
             onClick={() => setSettingsOpen(true)}
-            className="px-4 py-2 bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white rounded-full shadow-natura font-semibold hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-300 flex items-center space-x-2"
+            className="p-0 w-8 h-8 flex items-center justify-center bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white rounded-full shadow-natura font-semibold hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             <Settings className="h-4 w-4" />
-            <span>Configurações</span>
+            <span className="sr-only">Configurações</span>
           </motion.button>
           <button
             onClick={logout}
@@ -112,9 +112,11 @@ export default function AdminLoginModal() {
       ) : (
         <button
           onClick={() => setOpen(true)}
-          className="px-4 py-2 bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white rounded-full shadow-natura font-semibold hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-300"
+          className="p-0 w-8 h-8 flex items-center justify-center bg-gradient-to-r from-[#8b4513] to-[#d2691e] text-white rounded-full shadow-natura font-semibold hover:from-[#a0522d] hover:to-[#8b4513] transition-all duration-300"
+          title="Login Administrador"
         >
-          Login Administrador
+          <User className="h-4 w-4" />
+          <span className="sr-only">Login Administrador</span>
         </button>
       )}
 
@@ -122,13 +124,13 @@ export default function AdminLoginModal() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm m-2 sm:m-4"
+            className="fixed inset-0 z-50 flex items-center justify-center m-2 sm:m-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="relative w-full max-w-full sm:max-w-md mx-auto max-h-full"
+              className="relative w-[80vw] sm:w-full sm:max-w-md mx-auto max-h-full"
               initial={{ scale: 0.95, y: 40 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 40 }}
@@ -153,13 +155,13 @@ export default function AdminLoginModal() {
       <AnimatePresence>
         {settingsOpen && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm m-2 sm:m-4"
+            className="fixed inset-0 z-50 flex items-center justify-center m-2 sm:m-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="relative w-full max-w-full sm:max-w-lg mx-auto max-h-full"
+              className="relative w-[80vw] sm:w-full sm:max-w-lg mx-auto max-h-full"
               initial={{ scale: 0.95, y: 40 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 40 }}
