@@ -82,7 +82,7 @@ export default function ProductsTable() {
       } else {
         alert('Erro ao deletar produto')
       }
-    } catch (err) {
+    } catch {
       alert('Erro ao deletar produto')
     }
   }
